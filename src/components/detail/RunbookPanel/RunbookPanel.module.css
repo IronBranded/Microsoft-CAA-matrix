@@ -1,0 +1,82 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.phaseTabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.phaseTab {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--paper-faint);
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.phaseTab:hover {
+  color: var(--paper-muted);
+}
+
+.phaseTab[data-active='true'][data-phase='triage'] {
+  color: var(--sev-medium);
+  background: var(--sev-medium-bg);
+  border-color: color-mix(in srgb, var(--sev-medium) 40%, transparent);
+}
+.phaseTab[data-active='true'][data-phase='contain'] {
+  color: var(--sev-critical);
+  background: var(--sev-critical-bg);
+  border-color: color-mix(in srgb, var(--sev-critical) 40%, transparent);
+}
+.phaseTab[data-active='true'][data-phase='investigate'] {
+  color: var(--signal);
+  background: var(--signal-dim);
+  border-color: color-mix(in srgb, var(--signal) 40%, transparent);
+}
+.phaseTab[data-active='true'][data-phase='recover'] {
+  color: var(--sev-low);
+  background: var(--sev-low-bg);
+  border-color: color-mix(in srgb, var(--sev-low) 40%, transparent);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+.stepIndex {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--signal);
+  padding-top: 2px;
+}
+
+.stepText {
+  font-size: 13.5px;
+  color: var(--paper-muted);
+  line-height: 1.6;
+}

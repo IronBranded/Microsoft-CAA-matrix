@@ -1,0 +1,112 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+  background: linear-gradient(165deg, var(--panel-raised) 0%, var(--panel) 65%);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  text-decoration: none;
+  box-shadow: var(--shadow-panel);
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong) 20%, var(--line-strong) 80%, transparent);
+  pointer-events: none;
+}
+
+.card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card[data-severity='critical'] {
+  border-left-color: var(--sev-critical);
+}
+.card[data-severity='critical']:hover {
+  box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(239, 68, 89, 0.18);
+}
+.card[data-severity='high'] {
+  border-left-color: var(--sev-high);
+}
+.card[data-severity='high']:hover {
+  box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(242, 136, 75, 0.18);
+}
+.card[data-severity='medium'] {
+  border-left-color: var(--sev-medium);
+}
+.card[data-severity='medium']:hover {
+  box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(232, 193, 76, 0.18);
+}
+.card[data-severity='low'] {
+  border-left-color: var(--sev-low);
+}
+.card[data-severity='low']:hover {
+  box-shadow: var(--shadow-card-hover), 0 0 0 1px rgba(95, 184, 138, 0.18);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stubTag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+.title {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--paper-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--paper-faint);
+}
+
+.domain {
+  white-space: nowrap;
+}
+
+.category {
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

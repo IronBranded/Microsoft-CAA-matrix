@@ -10,7 +10,7 @@ and 4-phase incident response runbooks.
 
 <h3 align="center">
   <a href="https://ironbranded.github.io/microsoft-cloud-attack-matrix/" target="_blank" rel="noopener noreferrer">
-    🟢 NAVIGATE THE ATLAS 🟢
+    🟢 NAVIGATE THE MATRIX 🟢
   </a>
 </h3>
 

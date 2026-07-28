@@ -6,10 +6,15 @@ telemetry, MITRE ATT&CK / Azure Threat Research Matrix (ATRM) mappings,
 dual-platform KQL (Microsoft Sentinel **and** Defender Advanced Hunting),
 and 4-phase incident response runbooks.
 
-This is a modular rebuild of an earlier single-file HTML prototype, restructured
-for ongoing maintenance: each threat scenario lives in its own file, validated
-against a shared schema, and the whole catalog deploys automatically to GitHub
-Pages on every merge to `main`.
+---
+
+<h3 align="center">
+  <a href="https://ironbranded.github.io/microsoft-cloud-attack-matrix/" target="_blank" rel="noopener noreferrer">
+    🟢 NAVIGATE THE ATLAS 🟢
+  </a>
+</h3>
+
+---
 
 ## Stack
 

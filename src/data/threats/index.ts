@@ -1,98 +1,114 @@
-import { ThreatEntrySchema, type ThreatEntry, type DomainSlug } from '@/types/threat'
+import { LogSourceListSchema, type LogSource } from '@/types/logSource'
 
 /**
- * Every file under ./entries/<domain>/*.ts is picked up automatically.
- * Adding a new threat is just adding a new file — nothing to register by
- * hand. Each file's default export is validated against ThreatEntrySchema
- * at load time so a malformed entry fails loudly instead of silently
- * vanishing from the catalog.
- *
- * Loading is intentionally lazy (no `eager: true`): with 58+ entries' worth
- * of KQL and runbook text, eagerly bundling every entry into the initial
- * chunk regardless of which view is showing became the dominant contributor
- * to bundle size. Vite code-splits each dynamic import into its own chunk,
- * so the app shell loads fast and entry data streams in afterward. Results
- * are cached after the first resolution — see getThreats().
- *
- * This file is Vite-only (import.meta.glob doesn't exist outside Vite).
- * scripts/validate-threats.ts re-implements discovery with plain fs for
- * use in CI, outside the Vite pipeline, and is unaffected by this file's
- * loading strategy.
+ * Verified against learn.microsoft.com as of July 2026. Where a given
+ * figure didn't match current official documentation, it's corrected here
+ * with a note explaining what changed and why — not silently overwritten.
  */
-const moduleLoaders = import.meta.glob('./entries/**/*.ts') as Record<
-  string,
-  () => Promise<{ default: unknown }>
->
+const rawLogSources: LogSource[] = [
+  {
+    id: 'unified-audit-log',
+    name: 'Unified Audit Log (UAL)',
+    priority: 'critical',
+    licenseRequirement: 'E3 (180d) / E5 (1yr, 4 workloads only)',
+    notes:
+      "Corrected from a commonly-repeated 90-day E3 figure: that was accurate before October 17, 2023, but the default changed to 180 days for records generated on or after that date and has stayed there since. The E5 1-year default also only applies to four specific workloads — Exchange, SharePoint, OneDrive, and Microsoft Entra ID — Teams, Power Platform, and Defender events still default to 180 days on E5 too unless a custom retention policy is explicitly configured for them. E5 can extend to 10 years with the Audit (Premium) retention add-on. A single portal search is also capped at a 180-day window regardless of how far back data is retained; older records need pagination or the Management Activity API.",
+  },
+  {
+    id: 'mail-items-accessed',
+    name: 'MailItemsAccessed',
+    priority: 'critical',
+    licenseRequirement: 'E5 / Audit (Premium) only — not available on E3',
+    notes:
+      'Confirmed as given. An E3 tenant can get this via the Microsoft 365 E5 Compliance or E5 eDiscovery and Audit add-on, applied per-user rather than tenant-wide — a practical option worth knowing about for specifically your highest-risk mailboxes (executives, finance, IT admins) without licensing E5 broadly. Not retroactive: upgrading mid-investigation does not backfill events from before the upgrade.',
+  },
+  {
+    id: 'sign-in-logs',
+    name: 'Sign-in Logs (Interactive & Non-Interactive)',
+    priority: 'critical',
+    licenseRequirement: 'Free (7d) / P1 (30d) / P2 (30d)',
+    notes:
+      "Corrected: P1 and P2 give the same 30-day portal retention — there's no 90-day tier for sign-in logs specifically. (P2 does add an extra 60 days of retention for risky sign-in data specifically, via Identity Protection — a different, narrower thing than general sign-in log retention.) M365 E3 bundles Entra ID P1, so 'E3' and 'P1' land on the same 30-day figure in practice, but retention itself is governed by Entra edition, not the M365 SKU.",
+  },
+  {
+    id: 'entra-audit-logs',
+    name: 'Entra ID Audit Logs',
+    priority: 'high',
+    licenseRequirement: 'Free (7d) / P1+P2 (30d)',
+    notes: "Confirmed as given, matching Microsoft's own data-retention reference table exactly.",
+  },
+  {
+    id: 'mailbox-audit-log',
+    name: 'Mailbox Audit Log',
+    priority: 'high',
+    licenseRequirement: 'All plans, default enabled',
+    notes: 'Confirmed as given — mailbox audit logging has been on by default tenant-wide for several years now.',
+  },
+  {
+    id: 'message-trace-log',
+    name: 'Message Trace Log',
+    priority: 'high',
+    licenseRequirement: 'All plans — 10d real-time / 90d historical',
+  },
+  {
+    id: 'graph-activity-logs',
+    name: 'Microsoft Graph Activity Logs',
+    priority: 'high',
+    licenseRequirement: 'Requires Entra ID P1 or P2 — must enable via Diagnostic Settings',
+    notes:
+      "Corrected from 'all plans': Microsoft's own documentation states Graph Activity Logs are only available on Entra ID P1 or P2, not Free. This tracks a broader pattern — Diagnostic Settings themselves aren't offered on the Free tier at all, so anything gated behind them inherits the P1/P2 requirement.",
+  },
+  {
+    id: 'service-principal-signin-logs',
+    name: 'Service Principal Sign-in Logs',
+    priority: 'high',
+    licenseRequirement: 'Requires Entra ID P1 or P2 — must enable via Diagnostic Settings',
+    notes:
+      "Corrected from 'all plans' for the same reason as Graph Activity Logs above: this is a Diagnostic Settings category, and Diagnostic Settings require at least P1.",
+  },
+  {
+    id: 'intune-audit-logs',
+    name: 'Intune Audit Logs',
+    priority: 'high',
+    licenseRequirement: 'Any Intune license — requires Diagnostic Settings',
+    notes: "Not gated behind Entra P1/P2 — this is Intune's own Diagnostic Settings, a separate licensing surface.",
+  },
+  {
+    id: 'azure-devops-audit-logs',
+    name: 'Azure DevOps Audit Logs',
+    priority: 'high',
+    licenseRequirement: 'DevOps Basic — must enable in Org Settings',
+  },
+  {
+    id: 'azure-activity-log',
+    name: 'Azure Activity Log (AzureActivity)',
+    priority: 'critical',
+    licenseRequirement: 'Free, always generated — requires a Diagnostic Setting to reach a workspace',
+    notes:
+      "Added — used throughout the Azure Infrastructure & Compute domain of this catalog and worth including for the same reason those entries flag it repeatedly: the Activity Log itself is always being generated at the platform level regardless of licensing, but nothing routes it into a queryable Sentinel/Log Analytics workspace until a Diagnostic Setting explicitly does so. An empty query result more often means missing routing than a clean environment.",
+  },
+  {
+    id: 'nsg-flow-logs',
+    name: 'NSG Flow Logs',
+    priority: 'high',
+    licenseRequirement: 'Requires Network Watcher — consumption-based cost, not gated by M365/Entra licensing',
+    notes: 'Added — not on by default per NSG, and billed separately by volume rather than bundled into a license tier.',
+  },
+  {
+    id: 'managed-identity-signin-logs',
+    name: 'Managed Identity Sign-in Logs (AADManagedIdentitySignInLogs)',
+    priority: 'high',
+    licenseRequirement: 'Requires Entra ID P1 or P2 — must enable via Diagnostic Settings',
+    notes: 'Added — same Diagnostic Settings / P1+P2 gate as Service Principal Sign-in Logs above.',
+  },
+  {
+    id: 'adfs-signin-logs',
+    name: 'AD FS Sign-in Logs (ADFSSignInLogs)',
+    priority: 'medium',
+    licenseRequirement: 'Requires Microsoft Entra Connect Health for AD FS',
+    notes:
+      "Added, with lower confidence than the other rows here — the exact current licensing model for Entra Connect Health for AD FS wasn't independently re-verified to the same standard as the rest of this table. Confirm current requirements against Microsoft's own Connect Health documentation before treating this figure as load-bearing.",
+  },
+]
 
-let cachedThreats: ThreatEntry[] | null = null
-let loadingPromise: Promise<ThreatEntry[]> | null = null
-
-async function loadAllThreats(): Promise<ThreatEntry[]> {
-  const parsed: ThreatEntry[] = []
-  const errors: string[] = []
-  const seenIds = new Map<string, string>()
-
-  const resolved = await Promise.all(
-    Object.entries(moduleLoaders).map(async ([path, loader]) => {
-      const mod = await loader()
-      return [path, mod] as const
-    }),
-  )
-
-  for (const [path, mod] of resolved) {
-    const result = ThreatEntrySchema.safeParse(mod.default)
-
-    if (!result.success) {
-      const issues = result.error.issues
-        .map((issue) => `${issue.path.join('.') || '(root)'} — ${issue.message}`)
-        .join('; ')
-      errors.push(`${path}: ${issues}`)
-      continue
-    }
-
-    const existing = seenIds.get(result.data.id)
-    if (existing) {
-      errors.push(`${path}: duplicate id "${result.data.id}" (already used by ${existing})`)
-      continue
-    }
-
-    seenIds.set(result.data.id, path)
-    parsed.push(result.data)
-  }
-
-  if (errors.length > 0) {
-    console.error(
-      `[threats] ${errors.length} threat file(s) failed validation and were excluded from the catalog:\n${errors.join('\n')}`,
-    )
-  }
-
-  return parsed.sort((a, b) => a.title.localeCompare(b.title))
-}
-
-/** Resolves once, then serves cached results — safe to call from multiple components. */
-export function getThreats(): Promise<ThreatEntry[]> {
-  if (cachedThreats) return Promise.resolve(cachedThreats)
-  if (!loadingPromise) {
-    loadingPromise = loadAllThreats().then((result) => {
-      cachedThreats = result
-      return result
-    })
-  }
-  return loadingPromise
-}
-
-export function getThreatById(threats: ThreatEntry[], id: string): ThreatEntry | undefined {
-  return threats.find((t) => t.id === id)
-}
-
-export function getThreatsByDomain(threats: ThreatEntry[], domain: DomainSlug): ThreatEntry[] {
-  return threats.filter((t) => t.domain === domain)
-}
-
-export function countByDomain(threats: ThreatEntry[]): Record<DomainSlug, number> {
-  const counts = {} as Record<DomainSlug, number>
-  for (const t of threats) {
-    counts[t.domain] = (counts[t.domain] ?? 0) + 1
-  }
-  return counts
-}
+export const logSources: LogSource[] = LogSourceListSchema.parse(rawLogSources)

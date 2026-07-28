@@ -1,0 +1,80 @@
+.view {
+  max-width: var(--content-max-width);
+}
+
+.viewHead {
+  margin-bottom: var(--space-6);
+}
+
+.heading {
+  font-size: 30px;
+  margin-bottom: var(--space-1);
+}
+
+.focus {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--paper-faint);
+  max-width: 62ch;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  background: var(--panel-raised);
+  padding: 8px var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.table td {
+  padding: 10px var(--space-4);
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  color: var(--paper-muted);
+  line-height: 1.5;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.priorityCol {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.sourceCol {
+  width: 260px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--paper);
+}
+
+.requirement {
+  color: var(--paper);
+  font-size: 13px;
+}
+
+.notes {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--paper-faint);
+  line-height: 1.6;
+}

@@ -38,6 +38,9 @@ export default function Header() {
 
       <div className={styles.meta}>
         {!loading && <span className={styles.count}>{threats.length} scenarios</span>}
+        <Link to="/acquisition" className={styles.navLink} data-active={segments[0] === 'acquisition'}>
+          Acquisition Guide
+        </Link>
         <a className={styles.repoLink} href={REPO_URL} target="_blank" rel="noreferrer">
           GitHub
         </a>

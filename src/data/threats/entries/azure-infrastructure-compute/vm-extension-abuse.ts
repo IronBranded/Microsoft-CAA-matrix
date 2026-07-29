@@ -22,7 +22,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'VM guest OS — extension working directories',
-      artifact: 'The deployed script content and execution logs under the extension handler\'s local directory, recoverable shortly after execution',
+      artifact:
+        "The deployed script content and execution logs under the extension handler's local directory, recoverable shortly after execution — typically under C:\\Packages\\Plugins\\ on Windows and /var/lib/waagent/ on Linux, though exact paths vary by Azure VM Agent version; confirm the current layout on the specific OS/agent combination rather than assuming the path is identical across the fleet.",
     },
     {
       source: 'DeviceProcessEvents (VM guest OS)',

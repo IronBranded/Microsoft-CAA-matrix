@@ -3,4 +3,4 @@
  * actual GitHub repository (see also the GH_PAGES_BASE constant in
  * vite.config.ts, which must match the same repo name).
  */
-export const REPO_URL = 'https://github.com/ironbranded/microsoft-cloud-attack-matrix'
+export const REPO_URL = 'https://github.com/IronBranded/Microsoft-CAA-matrix'

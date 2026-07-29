@@ -1,4 +1,4 @@
-# Microsoft Cloud Attack & Abuse Matrix
+# Microsoft Cloud Attack & Abuse (CAA) Matrix
 
 A browsable, searchable DFIR reference catalog for Microsoft 365, Entra ID,
 and Azure Infrastructure attack and abuse scenarios.

@@ -26,7 +26,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Entra ID AuditLogs',
-      artifact: "The TAP's configured lifetime and one-time-use setting — a long-lived, reusable TAP is a much larger exposure window than a short, one-time one",
+      artifact:
+        "The TAP's configured lifetime and one-time-use setting — a long-lived, reusable TAP is a much larger exposure window than a short, one-time one. Also worth checking: whether the account already had another MFA method registered before the TAP was issued — TAP is meant for bootstrap/recovery scenarios, so a TAP issued to an account that wasn't actually locked out is itself an anomaly worth the same scrutiny as the registration event it enabled.",
     },
     {
       source: 'Entra ID SigninLogs',

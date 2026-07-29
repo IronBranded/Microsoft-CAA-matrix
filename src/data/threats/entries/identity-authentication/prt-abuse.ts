@@ -26,7 +26,7 @@ const entry: ThreatEntry = {
     {
       source: 'Entra ID device object',
       artifact:
-        "The device object the PRT claims to be bound to — check `dsregcmd /status` on the purported device, or its TPM attestation state, for consistency with how and where the token is actually being used",
+        "The device object the PRT claims to be bound to — check `dsregcmd /status` on the purported device, or its TPM attestation state, for consistency with how and where the token is actually being used. Where TPM-bound key storage is properly enforced, the session key itself can't be extracted even with LSASS access — a successful extraction despite this control being nominally enabled is itself worth investigating as a possible TPM/attestation bypass or misconfiguration, not just the token theft.",
     },
     {
       source: 'Entra ID NonInteractiveUserSignInLogs',

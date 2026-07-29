@@ -6,7 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 // resolve correctly on GitHub Pages, e.g. for
 // github.com/ironbranded/microsoft-cloud-attack-matrix this stays as-is;
 // if you deploy under a different repo name, change it to match.
-const GH_PAGES_BASE = '/microsoft-cloud-attack-matrix/'
+const GH_PAGES_BASE = '/Microsoft-CAA-matrix/'
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],

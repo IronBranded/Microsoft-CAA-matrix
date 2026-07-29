@@ -5,7 +5,7 @@ const entry: ThreatEntry = {
   title: 'Teams-Based Phishing',
   domain: 'email-messaging-bec',
   category: 'Initial Access',
-  severity: 'medium',
+  severity: 'high',
   status: 'complete',
   shortDesc: 'Using external Teams messaging via federation, or a compromised internal account, to push malicious links or files through a channel with generally lower user suspicion than email.',
   description:
@@ -32,6 +32,16 @@ const entry: ThreatEntry = {
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: 'Link-click or file-download activity following receipt of an external Teams message, if the lure included a malicious link/attachment',
     },
+    {
+      source: 'Microsoft Teams call logs',
+      artifact:
+        "Inbound Teams voice calls from external/unfamiliar tenants, particularly impersonating IT support — voice-based Teams phishing has grown into a high-volume vector in its own right, not a rare edge case, with observed activity concentrated on weekdays during business hours. This is a distinct telemetry surface from the message-based artifacts above; a tenant only monitoring chat/message logs will miss this entirely.",
+    },
+    {
+      source: 'DeviceProcessEvents / remote-access tool telemetry',
+      artifact:
+        "Quick Assist (or similar remote-access tooling — AnyDesk, ConnectWise) launched shortly after an unsolicited Teams call — a documented attack chain: a vishing call impersonating IT support, the victim talked through granting remote-access tool permissions, leading to full device compromise. This chain has been observed moving from initial contact to ransomware deployment in under 24 hours in some cases, which is fast enough that this specific combination (unsolicited call + remote-access tool launch) warrants immediate escalation rather than routine triage.",
+    },
   ],
 
   telemetry: {
@@ -39,6 +49,7 @@ const entry: ThreatEntry = {
       "External Teams federation defaults and scope vary — confirm your tenant's actual configuration rather than assuming it's restricted, since an overly open default is common and is the root enabler here.",
       'A newly-created external tenant with no prior collaboration history messaging your users out of the blue is a strong signal, distinguishable from a genuine, established partner relationship.',
       "This technique's effectiveness comes largely from user unfamiliarity with the threat model on this specific platform — training coverage gaps here are as much a root cause as any technical control gap.",
+      "Fraudulent, purpose-created tenants used specifically to initiate Teams meeting chats with target users — and, increasingly, to place direct voice calls — is a documented pattern distinct from a compromised-account variant of this same technique. Both end up in the artifacts above, but the fraudulent-tenant variant is worth distinguishing during triage since it implies no internal account is actually compromised yet.",
     ],
   },
 

@@ -32,6 +32,11 @@ const entry: ThreatEntry = {
       source: 'Entra ID Identity Protection',
       artifact: "'Anomalous token' risk detection — the same purpose-built signal used for AiTM, since the underlying pattern is shared regardless of how the credential was obtained",
     },
+    {
+      source: "Entra ID's built-in Continuous Access Evaluation (CAE) workbook",
+      artifact:
+        "The 'potential IP address mismatch between Microsoft Entra ID and resource provider' table in this Microsoft-provided workbook directly surfaces sessions where the sign-in IP and the resource-access IP diverge — precisely the pattern a replayed token produces, without needing to hand-build the correlation query. Worth checking before writing custom KQL for this.",
+    },
   ],
 
   telemetry: {
@@ -39,6 +44,7 @@ const entry: ThreatEntry = {
       'This is the general case that AiTM and Primary Refresh Token Abuse elsewhere in this matrix are specific mechanisms of — the detection principle is shared across all three.',
       'Commodity infostealer malware is a common source of bulk cookie theft, distinct from the more targeted AiTM/PRT techniques — check endpoint telemetry for known infostealer indicators alongside the identity-side signals.',
       'auth_time / iat claim analysis on a captured token pinpoints the original theft moment, the same technique used for device code phishing and AiTM.',
+      "If the target resource supports Continuous Access Evaluation, a stolen token can actually have a longer useful lifetime for the attacker than the pre-CAE default (up to 28 hours rather than the standard 60-90 minutes), since CAE trades shorter default expiry for real-time backchannel revocation — but that revocation only helps if something actually triggers it (password reset, session revoke, risk detection). A stolen CAE token that never trips a revocation event outlives what most responders would assume is the token's natural expiry.",
     ],
   },
 

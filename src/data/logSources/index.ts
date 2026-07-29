@@ -1,4 +1,4 @@
-import { LogSourceListSchema, type LogSource } from '@/types/logSource'
+import { LogSourceListSchema, type LogSource } from '../../types/logSource'
 
 const rawLogSources: LogSource[] = [
   {

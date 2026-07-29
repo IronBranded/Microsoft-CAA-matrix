@@ -21,6 +21,11 @@ const entry: ThreatEntry = {
       artifact: 'Guest account creation events and the inviting user — establishes whether the invitation itself followed a legitimate business process',
     },
     {
+      source: 'Entra ID External collaboration settings',
+      artifact:
+        "Who is permitted to invite guests tenant-wide — if set to 'anyone' rather than restricted to admins/specific roles, any compromised standard account can itself be the source of a stale-guest invitation later exploited, not just an admin account.",
+    },
+    {
       source: 'Entra ID SigninLogs',
       artifact: "Guest account sign-in patterns compared to the inviting organization's typical collaboration activity — access far beyond what the original collaboration purpose would suggest",
     },

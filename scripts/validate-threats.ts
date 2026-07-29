@@ -1,17 +1,22 @@
 /**
- * Standalone validation for the threat catalog, meant to run outside the
- * Vite pipeline (in CI, pre-commit, or locally via `npm run validate:threats`).
+ * Standalone validation for all schema-governed catalog content — threat
+ * entries and the Acquisition Guide's log sources — meant to run outside
+ * the Vite pipeline (in CI, pre-commit, or locally via
+ * `npm run validate:content`).
  *
- * This intentionally does NOT use import.meta.glob — that's a Vite-only API.
- * Discovery here is plain fs recursion so this script works anywhere `tsx`
- * runs, with no bundler involved.
+ * This intentionally does NOT use import.meta.glob — that's a Vite-only
+ * API. Discovery here is plain fs recursion so this script works anywhere
+ * `tsx` runs, with no bundler involved.
  */
 import { readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { ZodError } from 'zod'
 import { ThreatEntrySchema } from '../src/types/threat'
+import type { LogSource } from '../src/types/logSource'
 
 const ENTRIES_ROOT = join(import.meta.dirname, '..', 'src', 'data', 'threats', 'entries')
+const LOG_SOURCES_PATH = join(import.meta.dirname, '..', 'src', 'data', 'logSources', 'index.ts')
 
 function findEntryFiles(dir: string): string[] {
   const files: string[] = []
@@ -27,7 +32,7 @@ function findEntryFiles(dir: string): string[] {
   return files
 }
 
-async function main() {
+async function validateThreats(): Promise<number> {
   const files = findEntryFiles(ENTRIES_ROOT)
   console.log(`Found ${files.length} threat file(s) under src/data/threats/entries.\n`)
 
@@ -67,17 +72,64 @@ async function main() {
     seenIds.set(id, relPath)
   }
 
-  console.log(`\n${files.length - errorCount}/${files.length} file(s) passed validation.`)
+  console.log(`${files.length - errorCount}/${files.length} threat file(s) passed validation.`)
+  return errorCount
+}
 
-  if (errorCount > 0) {
-    console.error(`\n${errorCount} threat file(s) failed validation. See details above.`)
+async function validateLogSources(): Promise<number> {
+  const relPath = relative(process.cwd(), LOG_SOURCES_PATH)
+  console.log(`\nValidating src/data/logSources/index.ts.\n`)
+
+  // The module itself calls LogSourceListSchema.parse() at the top level,
+  // so an invalid entry throws on import rather than returning a result we
+  // can inspect — caught below and reported in the same itemized style as
+  // threat entries, rather than surfacing as a raw crash.
+  let sources: LogSource[]
+  try {
+    const mod = await import(pathToFileURL(LOG_SOURCES_PATH).href)
+    sources = mod.logSources
+  } catch (err) {
+    console.error(`✗ ${relPath}`)
+    if (err instanceof ZodError) {
+      for (const issue of err.issues) {
+        console.error(`    ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      }
+    } else {
+      console.error(`    ${err instanceof Error ? err.message : String(err)}`)
+    }
+    console.log(`\n0/? log source(s) passed validation.`)
+    return 1
+  }
+
+  let errorCount = 0
+  const seenIds = new Set<string>()
+  for (const source of sources) {
+    if (seenIds.has(source.id)) {
+      errorCount++
+      console.error(`✗ ${relPath}`)
+      console.error(`    duplicate log source id "${source.id}"`)
+    }
+    seenIds.add(source.id)
+  }
+
+  console.log(`${sources.length - errorCount}/${sources.length} log source(s) passed validation.`)
+  return errorCount
+}
+
+async function main() {
+  const threatErrors = await validateThreats()
+  const logSourceErrors = await validateLogSources()
+  const totalErrors = threatErrors + logSourceErrors
+
+  if (totalErrors > 0) {
+    console.error(`\n${totalErrors} item(s) failed validation. See details above.`)
     process.exit(1)
   }
 
-  console.log('All threat entries are valid.')
+  console.log('\nAll catalog content is valid.')
 }
 
 main().catch((err) => {
-  console.error('validate-threats crashed:', err)
+  console.error('validate-content crashed:', err)
   process.exit(1)
 })

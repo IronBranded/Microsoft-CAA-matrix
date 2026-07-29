@@ -5,10 +5,9 @@ and Azure Infrastructure attack and abuse scenarios.
 
 <h3 align="center">
   <a href="https://ironbranded.github.io/microsoft-cloud-attack-matrix/" target="_blank" rel="noopener noreferrer">
-    🟢 NAVIGATE THE ATLAS 🟢
+    🟢 START THE MATRIX 🟢
   </a>
 </h3>
-
 
 ## What's in it
 

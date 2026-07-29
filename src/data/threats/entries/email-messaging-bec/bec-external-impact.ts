@@ -19,7 +19,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'OfficeActivity',
-      artifact: 'MailItemsAccessed events immediately preceding the fraudulent reply, showing the attacker reading an existing invoice/payment thread before crafting a convincing reply into it',
+      artifact:
+        "MailItemsAccessed events immediately preceding the fraudulent reply, showing the attacker reading an existing invoice/payment thread before crafting a convincing reply into it — this specific event type requires E5 or the Audit (Premium) add-on and isn't available on E3 (see the Acquisition Guide); if the tenant is E3-only, this particular artifact won't exist regardless of how thoroughly you search, and the investigation needs to rely on Message Trace and the surrounding sign-in telemetry instead.",
     },
     {
       source: 'Entra ID SigninLogs',

@@ -22,7 +22,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Power Platform Data Loss Prevention policies',
-      artifact: "Whether a DLP policy exists that would block mixing business connectors (Exchange, SharePoint) with non-business ones (arbitrary HTTP, personal email) — the absence of such a policy is what makes this technique viable",
+      artifact:
+        "Whether a DLP policy exists that would block mixing business connectors (Exchange, SharePoint) with non-business ones (arbitrary HTTP, personal email) — the absence of such a policy is what makes this technique viable. Also check whether the environment the flow was created in is a Managed Environment — unmanaged environments generally have looser default governance (maker permissions, sharing limits, DLP enforcement scope) than Managed Environments, so which type of environment this happened in affects both root cause and how tightly remediation needs to scope.",
     },
     {
       source: 'Flow run history',

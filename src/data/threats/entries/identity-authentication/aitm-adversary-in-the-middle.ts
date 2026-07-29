@@ -24,7 +24,18 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Microsoft Defender for Cloud Apps',
-      artifact: 'Built-in alerts tuned specifically for AiTM patterns — suspicious session cookie reuse and related token-replay detections',
+      artifact:
+        "The named Defender alert 'Suspicious activity likely indicative of a connection to an adversary-in-the-middle (AiTM) phishing site' — a specific, documented alert title rather than a generic anomaly score, worth alerting on directly rather than only hunting for it manually.",
+    },
+    {
+      source: 'OfficeActivity — mail flow / message headers',
+      artifact:
+        "Phishing lures delivered via legitimate bulk-email infrastructure (SendGrid and similar services) disguised as payment or receipt notifications — a documented delivery pattern for EvilProxy-based AiTM activity generally. A spike in mail from these services to a small set of users shortly before an anomalous-token detection is a meaningful correlation, not a coincidence.",
+    },
+    {
+      source: 'OfficeActivity (SharePoint) + SigninLogs',
+      artifact:
+        "A SharePoint file-share notification immediately preceding an AiTM sign-in — SharePoint sharing notifications are a documented initial lure delivery mechanism for multi-stage attacks that pivot from AiTM into BEC via inbox rules. If present, this pattern also produces two other named signals worth checking directly: 'Unfamiliar Signin Correlation with AzurePortal Signin Attempts and AuditLogs' and 'Multiple users email forwarded to same destination'.",
     },
     {
       source: 'Entra ID Identity Protection',
@@ -41,6 +52,7 @@ const entry: ThreatEntry = {
       'The same session/token identifier reused across two sign-ins with materially different IP, device, or location properties is the core signal — the legitimate auth completes once, and the stolen cookie gets replayed separately.',
       "auth_time in the token stays fixed to the original phishing moment across any subsequent refreshes.",
       "Because the AiTM proxy relays the victim's real browser/device signals during the initial phish, device-compliance Conditional Access may not block the initial theft — Conditional Access Token Protection, which invalidates the token when replayed from a different device, is the control actually designed to defeat this, rather than trying to catch the phishing page in the moment.",
+      "AiTM activity today is overwhelmingly delivered through phishing-as-a-service (PhaaS) kits — Tycoon2FA is currently the dominant platform by volume, with Evilginx and EvilProxy as the other widely-used open-source/commercial proxy frameworks. This matters for detection because these kits' proxy infrastructure and page templates are well-fingerprinted; a fresh Defender TI or threat-intel feed lookup against the observed proxy domain is often faster than building detection from first principles.",
       "There is deliberately no relevantErrorCodes entry for this scenario: a well-executed AiTM proxy produces a fully successful sign-in with no distinguishing AADSTS code at all, which is precisely what makes it dangerous — the risk-detection and session-correlation signals above are the only real handle DFIR has on it.",
     ],
   },

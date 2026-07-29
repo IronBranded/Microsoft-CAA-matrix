@@ -18,7 +18,7 @@ const entry: ThreatEntry = {
     },
     {
       source: 'OfficeActivity',
-      artifact: 'MailItemsAccessed on internal correspondence threads immediately before crafting a convincing internal lateral-phish reply',
+      artifact: 'MailItemsAccessed on internal correspondence threads immediately before crafting a convincing internal lateral-phish reply — requires E5 or Audit (Premium); not available on E3 (see the Acquisition Guide)',
     },
     {
       source: 'Entra ID SigninLogs',

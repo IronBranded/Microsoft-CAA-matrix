@@ -14,7 +14,8 @@ const entry: ThreatEntry = {
   forensicArtifacts: [
     {
       source: 'Entra ID App registrations — Federated credentials',
-      artifact: 'The configured subject identifier pattern — overly broad patterns (trusting any branch/workflow in an org rather than one specific repo and branch) are the root cause of this technique\'s exploitability',
+      artifact:
+        "The configured subject identifier pattern — overly broad patterns (trusting any branch/workflow in an org rather than one specific repo and branch) are the root cause of this technique's exploitability. A common concrete mistake: a subject pattern scoped to an entire organization or repository (e.g., anything matching repo:org/* or a pull_request-triggered workflow, which runs with the PR branch's own code) rather than a specific branch/environment/ref — a pull-request-scoped trust in particular means anyone who can open a PR, not just anyone who can merge to main, can mint a token.",
     },
     {
       source: 'Entra ID AuditLogs',

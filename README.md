@@ -3,7 +3,12 @@
 A browsable, searchable DFIR reference catalog for Microsoft 365, Entra ID,
 and Azure Infrastructure attack and abuse scenarios.
 
-**Live: https://ironbranded.github.io/microsoft-cloud-attack-matrix/**
+<h3 align="center">
+  <a href="https://ironbranded.github.io/microsoft-cloud-attack-matrix/" target="_blank" rel="noopener noreferrer">
+    🟢 NAVIGATE THE ATLAS 🟢
+  </a>
+</h3>
+
 
 ## What's in it
 

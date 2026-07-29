@@ -22,7 +22,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Entra ID App registrations',
-      artifact: "The service principal's actual granted permissions — defines the blast radius regardless of how the credential leaked",
+      artifact:
+        "The service principal's actual granted permissions — defines the blast radius regardless of how the credential leaked. Also check the credential's own configured expiry: a client secret or certificate with a multi-year validity window (or one that's been silently rotated to a fresh multi-year window repeatedly) represents a standing risk independent of any specific leak, since it gives a one-time credential exposure a correspondingly long useful life for an attacker.",
     },
     {
       source: 'AzureActivity / CloudAppEvents / OfficeActivity',

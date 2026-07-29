@@ -13,9 +13,9 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
-      source: 'NSG Flow Logs (a diagnostic log category, not enabled by default)',
+      source: 'NSG Flow Logs (deprecated) / Virtual Network Flow Logs (current)',
       artifact:
-        "Internal east-west traffic between VMs/subnets that shouldn't have a legitimate reason to communicate directly, given an overly permissive any-to-any NSG rule — this data doesn't exist at all unless Flow Logs are explicitly turned on per-NSG in Diagnostic Settings; confirm that before treating an empty result as clean",
+        "Internal east-west traffic between VMs/subnets that shouldn't have a legitimate reason to communicate directly, given an overly permissive any-to-any NSG rule — this data doesn't exist at all unless Flow Logs are explicitly enabled, and NSG Flow Logs specifically stopped accepting new configurations in mid-2025 in favor of Virtual Network Flow Logs, the current recommended path. Check which one, if either, is actually configured before treating an empty result as clean — an environment predating the deprecation may still be relying on the older, no-longer-creatable NSG version.",
     },
     {
       source: 'AzureActivity',

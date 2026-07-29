@@ -25,6 +25,11 @@ const entry: ThreatEntry = {
       artifact: 'The registering user/session — device registration is typically self-service, so this technique is usually a second step after some other compromise',
     },
     {
+      source: 'Entra ID Devices — device settings',
+      artifact:
+        "The tenant's configured 'Maximum number of devices per user' setting (default is a moderate cap, but tenants sometimes raise or unlimit it for legitimate reasons) — a user suddenly approaching or exceeding what would normally be a reasonable personal device count is a quota-based signal independent of any single registration event looking suspicious on its own.",
+    },
+    {
       source: 'Entra ID SigninLogs',
       artifact: 'Subsequent sign-ins where the Conditional Access decision references the newly-registered device — confirms the device is actively being used to satisfy device-trust policy',
     },

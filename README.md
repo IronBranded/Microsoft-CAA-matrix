@@ -4,7 +4,7 @@ A browsable, searchable DFIR reference catalog for Microsoft 365, Entra ID,
 and Azure Infrastructure attack and abuse scenarios.
 
 <h3 align="center">
-  <a href="https://ironbranded.github.io/Microsoft-Cloud-AA-matrix/" target="_blank" rel="noopener noreferrer">
+  <a href="https://ironbranded.github.io/Microsoft-CAA-matrix/" target="_blank" rel="noopener noreferrer">
     🟢 START THE MATRIX 🟢
   </a>
 </h3>

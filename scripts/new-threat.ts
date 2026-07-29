@@ -112,7 +112,7 @@ export default entry
 
   writeFileSync(filePath, contents, 'utf8')
   console.log(`\nWrote ${filePath}`)
-  console.log('Run `npm run validate:threats` to confirm it passes schema validation.')
+  console.log('Run `npm run validate:content` to confirm it passes schema validation.')
 }
 
 main().catch((err) => {

@@ -32,6 +32,16 @@ const entry: ThreatEntry = {
       source: 'Mailbox folder contents',
       artifact: 'Messages sitting in the target folder or in Deleted Items that the legitimate user never saw — the direct evidence of what the rule successfully hid',
     },
+    {
+      source: 'OfficeActivity',
+      artifact:
+        "Rules specifically targeting HR/payroll-platform notification senders (Workday and similar HRSaaS domains) rather than banking correspondence — a documented pattern in payroll-fraud-focused BEC: compromise the mailbox, then create a rule deleting the platform's own change-confirmation emails so the victim never sees the salary-redirect notification before the next pay cycle.",
+    },
+    {
+      source: 'Entra ID NonInteractiveUserSignInLogs',
+      artifact:
+        "Recurring non-interactive sign-ins to the OfficeHome application specifically, from an automation-style UserAgent (Axios and similar HTTP client libraries are commonly seen), at a suspiciously regular interval — this is how an attacker keeps a stolen session alive between actions rather than relying on one-time token use. A regular, machine-precise interval (as opposed to the irregular pattern of genuine human activity) is the actual signal, whatever the specific period turns out to be. Sessions maintained this way typically go inactive within weeks of compromise once refresh tokens expire or are rotated, which bounds how far back a durable-persistence investigation usually needs to look.",
+    },
   ],
 
   telemetry: {
@@ -39,6 +49,7 @@ const entry: ThreatEntry = {
       'This is a companion technique, not usually the objective itself — its presence strongly indicates BEC Internal or External Impact is also underway, and should trigger a broader investigation, not just rule removal.',
       'Rule scope precision is informative: a rule targeting one specific external domain or a handful of keywords is far more likely deliberate fraud-concealment than a broad, generic rule.',
       "DeleteMessage is more aggressive than MoveToFolder — the former destroys the user's own visibility entirely, subject to Deleted Items recovery windows, while the latter merely relocates it.",
+      "If the underlying compromise fits a payroll-fraud pattern, check for a second persistence mechanism alongside the inbox rule: attacker-controlled phone numbers enrolled as MFA devices is a documented technique in this category — on the Entra account directly, or on the HR platform's own MFA settings (e.g., Duo) if the platform manages authentication separately from Entra ID. A removed inbox rule with this left in place is not actually contained.",
     ],
   },
 

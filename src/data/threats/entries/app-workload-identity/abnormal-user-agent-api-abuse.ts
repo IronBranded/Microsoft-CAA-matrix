@@ -14,7 +14,8 @@ const entry: ThreatEntry = {
   forensicArtifacts: [
     {
       source: 'Entra ID SigninLogs / AADServicePrincipalSignInLogs',
-      artifact: 'UserAgent values inconsistent with known first-party or approved third-party clients — generic HTTP library defaults or entirely absent User-Agent headers',
+      artifact:
+        "UserAgent values inconsistent with known first-party or approved third-party clients — generic HTTP library defaults or entirely absent User-Agent headers. Common default signatures worth a standing watchlist entry, since they show up across many different tools rather than one specific attacker: python-requests/, curl/, Go-http-client/, axios/, PostmanRuntime/. None of these are inherently malicious — plenty of legitimate automation uses them too — but an unexplained one against a sensitive resource is worth checking.",
     },
     {
       source: 'Microsoft Graph Activity Logs',

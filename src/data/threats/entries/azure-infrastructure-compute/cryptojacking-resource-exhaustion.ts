@@ -22,7 +22,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'AzureActivity',
-      artifact: "VM deployments across unusual regions, geographically distant from the organization's normal footprint, sometimes chosen for GPU SKU availability or lower cost",
+      artifact:
+        "VM deployments across unusual regions, geographically distant from the organization's normal footprint, sometimes chosen for GPU SKU availability or lower cost. A quota increase request (Microsoft.Capacity/resourceProviders/locations/serviceLimits or a support-ticket-driven quota bump) immediately preceding the deployment burst is often the actual first move — default subscription vCPU quotas are usually too low to deploy at cryptomining scale without one, making the quota request itself a checkable precursor event rather than just the resulting VMs.",
     },
     {
       source: 'DeviceProcessEvents (VM guest OS)',

@@ -10,7 +10,7 @@ const entry: ThreatEntry = {
   shortDesc:
     "Attacker intercepts an OAuth token by tricking a user into authenticating a device code on their behalf.",
   description:
-    "An attacker initiates a device code authentication flow, generating a code. They send this code via a phishing lure instructing the target to visit microsoft.com/devicelogin. Once the user authenticates (including MFA), the Entra ID token is delivered directly to the attacker's polling session. In its basic form this hands the attacker a plain access or refresh token — but the actively-exploited variant is worse: by requesting the token using the Microsoft Authentication Broker's own client ID (29d9ed98-a469-4536-ade2-f981bc1d605e) against the Device Registration Service, the attacker can register a rogue device in Entra ID that appears fully legitimate, then request a Primary Refresh Token (PRT) from it — bypassing device-based Conditional Access entirely, not just MFA. This exact escalation path is the standard playbook of Storm-2372, a Microsoft-tracked threat actor running large-scale device code phishing campaigns.",
+    "An attacker initiates a device code authentication flow, generating a code. They send this code via a phishing lure instructing the target to visit microsoft.com/devicelogin. Once the user authenticates (including MFA), the Entra ID token is delivered directly to the attacker's polling session. In its basic form this hands the attacker a plain access or refresh token — but a more severe, actively-exploited variant exists: by requesting the token using the Microsoft Authentication Broker's own client ID (29d9ed98-a469-4536-ade2-f981bc1d605e) against the Device Registration Service, the attacker can register a rogue device in Entra ID that appears fully legitimate, then request a Primary Refresh Token (PRT) from it — bypassing device-based Conditional Access entirely, not just MFA.",
 
   forensicArtifacts: [
     { source: 'Entra ID SigninLogs', artifact: "AuthenticationProtocol == 'deviceCode'" },
@@ -22,7 +22,7 @@ const entry: ThreatEntry = {
     {
       source: 'Entra ID SigninLogs',
       artifact:
-        "AppId == '29d9ed98-a469-4536-ade2-f981bc1d605e' (Microsoft Authentication Broker) combined with AuthenticationProtocol == 'deviceCode' is a high-fidelity indicator on its own — this specific client ID is what lets a stolen token be upgraded to register a rogue device and mint a PRT, and it's the client ID Storm-2372 campaigns specifically request. Legitimate use exists (genuine Windows Hello for Business enrollment, shared/kiosk device onboarding), so treat as a strong prioritization signal rather than an automatic block.",
+        "AppId == '29d9ed98-a469-4536-ade2-f981bc1d605e' (Microsoft Authentication Broker) combined with AuthenticationProtocol == 'deviceCode' is a high-fidelity indicator on its own — this specific client ID is what lets a stolen token be upgraded to register a rogue device and mint a PRT. Legitimate use exists (genuine Windows Hello for Business enrollment, shared/kiosk device onboarding), so treat as a strong prioritization signal rather than an automatic block.",
     },
     {
       source: 'Entra ID SigninLogs',
@@ -57,6 +57,7 @@ const entry: ThreatEntry = {
       "Resource/audience 01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9 (Device Registration Service): a device-code sign-in requesting this specific resource, combined with the Broker AppId above, is the exact combination used to obtain a device-registration token — the step immediately before rogue device registration and PRT issuance.",
       "JWT auth_time: If you capture a raw token (e.g., memory dump, reverse proxy logs), decode it. The `auth_time` claim represents the original authentication instance date/time, while the `iat` (Issued At) claim represents when that specific token was refreshed. Match `auth_time` against Interactive SigninLogs to find the exact phishing moment.",
       "amr_values=ngcmfa in the request / ngcmfa claim in the resulting token: a request parameter legitimately used by the Authentication Broker to force a 'next generation credential' (Windows Hello/PIN) MFA claim during genuine device registration — security researchers have demonstrated it can be included in a phished device code request to force the same claim into an attacker-controlled token. A token carrying ngcmfa can register a new FIDO2 security key or WHfB credential on the account, independent of what CA policy would otherwise require. The claim is only valid for roughly 15 minutes after authentication — a narrow but real window where fast containment can still prevent the credential registration even if the initial phish already succeeded.",
+      "Generative AI is increasingly used to hyper-personalize the phishing lure itself — emails themed around role-specific content (RFPs, invoices, manufacturing workflows) tailored to the individual victim, sometimes with AI-generated infrastructure handling device code generation end-to-end through post-compromise activity. This doesn't change any of the technical indicators above, but it means the initial lure is less likely to be caught by generic phishing-language detection than in earlier, more templated attempts — weight the technical signals in this entry over lure content when triaging.",
     ],
     relevantErrorCodes: [
       {
@@ -126,7 +127,7 @@ union CloudAppEvents, OfficeActivity, AzureActivity
       escalation: {
         title: 'Device code sign-in via Authentication Broker targeting Device Registration Service',
         description:
-          "Higher-fidelity than the generic triage query above — this is the specific Storm-2372-style combination (Broker AppId + DRS resource) used to obtain a device-registration token ahead of rogue device registration and PRT issuance. Confirm against legitimate WHfB enrollment or kiosk/shared-device onboarding in your tenant before treating every hit as confirmed malicious.",
+          "Higher-fidelity than the generic triage query above — this is the specific escalation combination (Broker AppId + DRS resource) used to obtain a device-registration token ahead of rogue device registration and PRT issuance. Confirm against legitimate WHfB enrollment or kiosk/shared-device onboarding in your tenant before treating every hit as confirmed malicious.",
         query: `SigninLogs
 | where TimeGenerated > ago(7d)
 | where AuthenticationProtocol =~ "deviceCode"

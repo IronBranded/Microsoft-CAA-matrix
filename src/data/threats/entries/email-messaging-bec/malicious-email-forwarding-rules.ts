@@ -42,6 +42,7 @@ const entry: ThreatEntry = {
       'CorrelationId / SessionId on the rule-creation event: pivot back to the SigninLogs entry for the session that created the rule.',
       'ForwardingSmtpAddress vs. ForwardingAddress on Set-Mailbox: ForwardingSmtpAddress takes a raw external SMTP address (most common in BEC); ForwardingAddress must resolve to a recipient object in the org.',
       'DeliverToMailboxAndForward flag: if false, the legitimate user never receives a copy at all — the forward is the only delivery, making the compromise fully invisible from the mailbox alone.',
+      "Tenant-wide automatic forwarding to external domains is blocked by default in current Exchange Online configurations — if a forward to an external address succeeded at all, either an org-wide exception/allow policy exists, or the specific mailbox has an explicit override. Check the outbound spam filter policy's external forwarding setting before assuming the mailbox-level rule alone explains how the mail actually left the tenant.",
     ],
   },
 

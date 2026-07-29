@@ -15,7 +15,7 @@ import { ThreatEntrySchema, type ThreatEntry, type DomainSlug } from '@/types/th
  * are cached after the first resolution — see getThreats().
  *
  * This file is Vite-only (import.meta.glob doesn't exist outside Vite).
- * scripts/validate-threats.ts re-implements discovery with plain fs for
+ * scripts/validate-content.ts re-implements discovery with plain fs for
  * use in CI, outside the Vite pipeline, and is unaffected by this file's
  * loading strategy.
  */

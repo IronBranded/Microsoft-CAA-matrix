@@ -38,7 +38,7 @@
   /* Text — content area */
   --paper: #eef1f5;
   --paper-muted: #9aa3b0;
-  --paper-faint: #6b7280;
+  --paper-faint: #858ea0;
 
   /* Signal — the one accent: links, focus rings, active nav, primary
      interaction. Tuned to the specific blue Microsoft's own Fluent
@@ -48,10 +48,15 @@
   --signal-ink: #0a2540;
 
   /* Severity — aligned to Fluent's semantic danger/warning/success
-     family, the palette Defender itself draws severity coding from */
-  --sev-critical: #dc3f47;
+     family, the palette Defender itself draws severity coding from.
+     Critical and high are tuned lighter than a first pass landed on —
+     the more saturated, darker reds/oranges that "look right" at a glance
+     measure under WCAG AA (4.5:1) against every background they actually
+     appear on at the small text sizes used throughout the app. Medium and
+     low pass at their original values; only these two needed adjusting. */
+  --sev-critical: #e46c72;
   --sev-critical-bg: rgba(220, 63, 71, 0.12);
-  --sev-high: #e8630c;
+  --sev-high: #f2670c;
   --sev-high-bg: rgba(232, 99, 12, 0.12);
   --sev-medium: #e0a825;
   --sev-medium-bg: rgba(224, 168, 37, 0.12);

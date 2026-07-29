@@ -29,6 +29,11 @@ const entry: ThreatEntry = {
       artifact: 'Requested API permissions/scopes on the new registration — broad Graph permissions on a brand-new, unfamiliar app are a strong signal',
     },
     {
+      source: 'Entra ID App registrations',
+      artifact:
+        "Redirect URI(s) configured on the registration — a URI pointing to a non-Microsoft domain, a URL shortener, or infrastructure with no connection to any legitimate business purpose is a direct, checkable artifact independent of the app's stated name or permissions.",
+    },
+    {
       source: 'Entra ID SigninLogs / AADServicePrincipalSignInLogs',
       artifact: "The new app's first sign-in activity and from where — attacker-controlled infrastructure rather than a legitimate deployment environment",
     },

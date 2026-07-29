@@ -121,3 +121,7 @@ depends on something worth double-checking against your own environment —
 a diagnostic setting that needs enabling, a schema that's changed recently,
 or a table naming convention that varies by license tier. Treat every query
 here as a strong starting point, not a guarantee.
+
+## License
+
+[MIT](LICENSE)

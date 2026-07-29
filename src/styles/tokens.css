@@ -1,0 +1,90 @@
+/**
+ * Design tokens.
+ *
+ * Direction: structural inspiration from Cortex XDR's endpoint management
+ * UI — a dense, sortable data table with compact status chips, not a card
+ * grid — paired with Microsoft Defender's actual color identity rather
+ * than a generic "confident blue." Both are genuine references: the table
+ * view (see ThreatTable) is a real structural borrow, and the palette
+ * below is tuned to Fluent's semantic danger/warning/success family,
+ * which is what Defender's own severity coding actually draws from,
+ * rather than an arbitrary traffic-light guess.
+ *
+ * Keeps the enterprise-mature discipline from the previous pass — flat
+ * surfaces, no glow, no decorative texture, a considered charcoal rather
+ * than near-black — this is a palette and structure change, not a return
+ * to the earlier SOC-terminal styling.
+ */
+:root {
+  /* Surface — content area: a considered charcoal, not near-black */
+  --ink: #15181d;
+  --panel: #1c2027;
+  --panel-raised: #242932;
+  --line: #2e343d;
+  --line-strong: #3c4350;
+
+  /* Chrome — header and sidebar get a distinctly branded deep navy rather
+     than another shade of the same neutral gray as the content area. Real
+     zoning between "the app" and "the data in it," the way most serious
+     consoles (this included) visually separate persistent navigation from
+     whatever's currently on screen. Derived from --signal's own hue, just
+     pushed dark and desaturated, so it reads as related, not arbitrary. */
+  --chrome: #0f2137;
+  --chrome-raised: #16304d;
+  --chrome-line: #1f3f60;
+  --chrome-text: #d8e4f0;
+  --chrome-text-muted: #8ba3bd;
+
+  /* Text — content area */
+  --paper: #eef1f5;
+  --paper-muted: #9aa3b0;
+  --paper-faint: #6b7280;
+
+  /* Signal — the one accent: links, focus rings, active nav, primary
+     interaction. Tuned to the specific blue Microsoft's own Fluent
+     design language and the Defender portal use. */
+  --signal: #2f8fe4;
+  --signal-dim: rgba(47, 143, 228, 0.14);
+  --signal-ink: #0a2540;
+
+  /* Severity — aligned to Fluent's semantic danger/warning/success
+     family, the palette Defender itself draws severity coding from */
+  --sev-critical: #dc3f47;
+  --sev-critical-bg: rgba(220, 63, 71, 0.12);
+  --sev-high: #e8630c;
+  --sev-high-bg: rgba(232, 99, 12, 0.12);
+  --sev-medium: #e0a825;
+  --sev-medium-bg: rgba(224, 168, 37, 0.12);
+  --sev-low: #5ea36b;
+  --sev-low-bg: rgba(94, 163, 107, 0.12);
+
+  /* Type */
+  --font-display: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius — small and precise, not heavily rounded */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* Elevation — restrained. Depth comes from a quiet shadow, not glow. */
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.35);
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --content-max-width: 920px;
+  --header-height: 64px;
+}

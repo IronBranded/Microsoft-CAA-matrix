@@ -1,0 +1,73 @@
+.view {
+  max-width: 1200px;
+}
+
+.head {
+  margin-bottom: var(--space-6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.focus {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--paper-faint);
+}
+
+.viewToggle {
+  display: flex;
+  flex-shrink: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.toggleBtn {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: var(--panel);
+  border: none;
+  color: var(--paper-faint);
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.toggleBtn + .toggleBtn {
+  border-left: 1px solid var(--line-strong);
+}
+
+.toggleBtn:hover {
+  color: var(--paper-muted);
+}
+
+.toggleBtn[data-active='true'] {
+  background: var(--signal-dim);
+  color: var(--signal);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.empty {
+  padding: var(--space-10) 0;
+  color: var(--paper-muted);
+  font-size: 14px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+}

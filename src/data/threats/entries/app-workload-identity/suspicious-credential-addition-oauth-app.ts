@@ -18,7 +18,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Entra ID AuditLogs',
-      artifact: "The acting identity and whether they're expected to manage that specific application's credentials — often requires only Application Administrator or ownership of the specific app, not a directory-wide role",
+      artifact:
+        "The acting identity and whether they're expected to manage that specific application's credentials — often requires only Application Administrator or ownership of the specific app, not a directory-wide role. Note that the credential's own displayName field (shown in the portal as a label like 'Prod cert' or a date) is a free-text value the adding identity sets — an attacker can label a newly-added secret to blend in with existing, legitimate-looking entries, so don't rely on the label alone to distinguish it from real credentials; the addition timestamp and acting identity are the reliable signals.",
     },
     {
       source: 'Entra ID App registrations',

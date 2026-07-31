@@ -22,7 +22,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Entra ID role assignment',
-      artifact: 'How the acting identity obtained eDiscovery Manager or an equivalent compliance role — this requires a specific, normally small population of privileged accounts',
+      artifact:
+        "How the acting identity obtained eDiscovery Manager or an equivalent compliance role — this requires a specific, normally small population of privileged accounts. The 'eDiscovery Manager' role (Standard) permits search and export within cases the user is added to; 'eDiscovery Administrator' additionally sees all cases tenant-wide and can manage case membership — an Administrator-level assignment where only Manager-level was ever intended is itself worth flagging independent of any specific search activity.",
     },
     {
       source: 'Exported content location',

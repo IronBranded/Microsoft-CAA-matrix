@@ -18,7 +18,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Defender for Office 365 / Exchange transport rules',
-      artifact: 'Whether a policy exists at all for flagging/blocking password-protected archive attachments outbound — many tenants have no specific control for this pattern',
+      artifact:
+        "Whether a policy exists at all for flagging/blocking password-protected archive attachments outbound — many tenants have no specific control for this pattern. The same evasion works identically via a SharePoint/OneDrive external share link to an encrypted archive rather than an email attachment — DLP content inspection has the same blind spot there, so check sharing activity for encrypted archives alongside mail flow, not instead of it.",
     },
     {
       source: 'OfficeActivity',

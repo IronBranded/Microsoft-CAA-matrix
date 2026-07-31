@@ -16,7 +16,7 @@ const entry: ThreatEntry = {
     {
       source: 'Microsoft Graph Activity Logs',
       artifact:
-        'High request-rate patterns against /me/messages, /me/drive/root/children, /users/{id}/messages, or similar bulk-list endpoints from a single client/token in a short window (requires enabling via Entra diagnostic settings)',
+        "High request-rate patterns against /me/messages, /me/drive/root/children, /users/{id}/messages, or similar bulk-list endpoints from a single client/token in a short window (requires enabling via Entra diagnostic settings). Repeated pagination through the same result set (sequential @odata.nextLink follows) or a delta query (/delta endpoints) pulling a full initial sync rather than incremental changes are both specific, checkable signatures of programmatic bulk retrieval rather than a human browsing.",
     },
     {
       source: 'AADNonInteractiveUserSignInLogs',

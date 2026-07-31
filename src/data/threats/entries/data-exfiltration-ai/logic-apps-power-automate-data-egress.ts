@@ -18,7 +18,8 @@ const entry: ThreatEntry = {
     },
     {
       source: 'Logic App run history',
-      artifact: 'Actual execution history and the volume/frequency of data sent to the external endpoint — confirms ongoing operation, not just configuration',
+      artifact:
+        "Actual execution history and the volume/frequency of data sent to the external endpoint — confirms ongoing operation, not just configuration. Run history in the portal has a default retention window (commonly 90 days) after which older runs age out; for anything beyond that window, the Logic App's own Diagnostic Settings (WorkflowRuntime logs, a separate diagnostic category from the AzureActivity control-plane log above) need to already have been routed to a workspace, or that history is simply gone.",
     },
     {
       source: 'OfficeActivity (Power Automate) — the Unified Audit Log (UAL)',

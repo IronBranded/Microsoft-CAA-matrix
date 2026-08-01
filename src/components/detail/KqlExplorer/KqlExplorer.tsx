@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useQueryParams, setQueryParams } from '@/lib/router'
 import type { KqlQueries } from '@/types/threat'
 import CopyButton from '@/components/common/CopyButton/CopyButton'
 import styles from './KqlExplorer.module.css'
@@ -14,20 +14,46 @@ const PLATFORM_LABEL: Record<Platform, string> = {
   defender: 'Defender Advanced Hunting',
 }
 
+/**
+ * Platform and active-query selection live in the URL (kqlPlatform /
+ * kqlQuery), not local state — so a link to "the Defender query
+ * specifically" actually lands there instead of always the default tab.
+ */
 export default function KqlExplorer({ kql }: KqlExplorerProps) {
+  const queryParams = useQueryParams()
+
   const availablePlatforms = PLATFORMS.filter((p) => {
     const group = kql[p]
     return group && Object.keys(group).length > 0
   })
 
-  const [platform, setPlatform] = useState<Platform | undefined>(availablePlatforms[0])
+  const requestedPlatform = queryParams.get('kqlPlatform') as Platform | null
+  const platform =
+    requestedPlatform && availablePlatforms.includes(requestedPlatform) ? requestedPlatform : availablePlatforms[0]
+
   const queriesForPlatform = platform ? (kql[platform] ?? {}) : {}
   const queryKeys = Object.keys(queriesForPlatform)
-  const [activeKey, setActiveKey] = useState<string | undefined>(queryKeys[0])
+
+  const requestedKey = queryParams.get('kqlQuery')
+  const activeKey = requestedKey && queryKeys.includes(requestedKey) ? requestedKey : queryKeys[0]
 
   function handlePlatformChange(next: Platform) {
-    setPlatform(next)
-    setActiveKey(Object.keys(kql[next] ?? {})[0])
+    const params = new URLSearchParams(queryParams)
+    params.set('kqlPlatform', next)
+    const nextKeys = Object.keys(kql[next] ?? {})
+    if (nextKeys[0]) {
+      params.set('kqlQuery', nextKeys[0])
+    } else {
+      params.delete('kqlQuery')
+    }
+    setQueryParams(params)
+  }
+
+  function handleQueryChange(key: string) {
+    const params = new URLSearchParams(queryParams)
+    if (platform) params.set('kqlPlatform', platform)
+    params.set('kqlQuery', key)
+    setQueryParams(params)
   }
 
   if (!platform) {
@@ -60,7 +86,7 @@ export default function KqlExplorer({ kql }: KqlExplorerProps) {
               type="button"
               className={styles.queryTab}
               data-active={activeKey === key}
-              onClick={() => setActiveKey(key)}
+              onClick={() => handleQueryChange(key)}
             >
               {queriesForPlatform[key].title}
             </button>

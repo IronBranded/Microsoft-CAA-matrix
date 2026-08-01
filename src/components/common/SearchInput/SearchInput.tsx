@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import { forwardRef, type ChangeEvent } from 'react'
 import styles from './SearchInput.module.css'
 
 interface SearchInputProps {
@@ -7,7 +7,10 @@ interface SearchInputProps {
   placeholder?: string
 }
 
-export default function SearchInput({ value, onChange, placeholder }: SearchInputProps) {
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput(
+  { value, onChange, placeholder },
+  ref,
+) {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     onChange(event.target.value)
   }
@@ -26,6 +29,7 @@ export default function SearchInput({ value, onChange, placeholder }: SearchInpu
         <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
       <input
+        ref={ref}
         className={styles.input}
         type="search"
         value={value}
@@ -33,6 +37,13 @@ export default function SearchInput({ value, onChange, placeholder }: SearchInpu
         placeholder={placeholder ?? 'Search scenarios, MITRE / ATRM IDs…'}
         aria-label="Search threat scenarios"
       />
+      {!value && (
+        <kbd className={styles.hint} aria-hidden="true">
+          /
+        </kbd>
+      )}
     </div>
   )
-}
+})
+
+export default SearchInput

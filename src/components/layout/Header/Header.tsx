@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useRoute, useQueryParams, setQueryParams, navigate, Link } from '@/lib/router'
 import SearchInput from '@/components/common/SearchInput/SearchInput'
 import { useThreats } from '@/lib/useThreats'
@@ -10,6 +11,21 @@ export default function Header() {
   const { threats, loading } = useThreats()
   const isCatalogRoute = segments.length === 0 || segments[0] === 'domain'
   const currentQuery = isCatalogRoute ? (queryParams.get('q') ?? '') : ''
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key !== '/') return
+      const target = e.target as HTMLElement | null
+      const isTypingElsewhere =
+        target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable
+      if (isTypingElsewhere) return
+      e.preventDefault()
+      searchRef.current?.focus()
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [])
 
   function handleSearchChange(value: string) {
     if (isCatalogRoute) {
@@ -33,7 +49,7 @@ export default function Header() {
       </Link>
 
       <div className={styles.search}>
-        <SearchInput value={currentQuery} onChange={handleSearchChange} />
+        <SearchInput ref={searchRef} value={currentQuery} onChange={handleSearchChange} />
       </div>
 
       <div className={styles.meta}>

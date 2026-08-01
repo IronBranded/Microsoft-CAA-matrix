@@ -1,3 +1,6 @@
+import { useEffect } from 'react'
+import { useQueryParams } from '@/lib/router'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { logSources } from '@/data/logSources'
 import { compareSeverity } from '@/lib/severity'
 import PriorityBadge from '@/components/common/PriorityBadge/PriorityBadge'
@@ -10,7 +13,20 @@ import styles from './AcquisitionView.module.css'
  * check underneath that assumption, license tier by license tier.
  */
 export default function AcquisitionView() {
+  useDocumentTitle('Acquisition Guide')
+  const queryParams = useQueryParams()
+  const highlightId = queryParams.get('highlight')
   const sorted = [...logSources].sort((a, b) => compareSeverity(a.priority, b.priority))
+
+  useEffect(() => {
+    if (!highlightId) return
+    // Deferred a tick so the row exists in the DOM before we try to scroll
+    // to it — this view can itself still be settling right after navigation.
+    const t = setTimeout(() => {
+      document.getElementById(highlightId)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
+    return () => clearTimeout(t)
+  }, [highlightId])
 
   return (
     <div className={styles.view}>
@@ -33,7 +49,7 @@ export default function AcquisitionView() {
           </thead>
           <tbody>
             {sorted.map((source) => (
-              <tr key={source.id}>
+              <tr key={source.id} id={source.id} data-highlighted={source.id === highlightId}>
                 <td className={styles.priorityCol}>
                   <PriorityBadge priority={source.priority} />
                 </td>

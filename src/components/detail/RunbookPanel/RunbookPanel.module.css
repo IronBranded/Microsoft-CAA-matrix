@@ -67,6 +67,23 @@
   border-bottom: none;
 }
 
+.stepLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  cursor: pointer;
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  accent-color: var(--signal);
+  cursor: pointer;
+}
+
 .stepIndex {
   flex-shrink: 0;
   font-family: var(--font-mono);
@@ -79,4 +96,49 @@
   font-size: 13.5px;
   color: var(--paper-muted);
   line-height: 1.6;
+}
+
+.stepText[data-checked='true'] {
+  color: var(--paper-faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.progressActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.progressText {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--paper-faint);
+}
+
+.resetBtn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--paper-faint);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.resetBtn:hover {
+  color: var(--paper-muted);
+  border-color: var(--paper-faint);
 }

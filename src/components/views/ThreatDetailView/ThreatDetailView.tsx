@@ -1,6 +1,7 @@
 import { Link } from '@/lib/router'
 import { getThreatById } from '@/data/threats'
 import { useThreats } from '@/lib/useThreats'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { DOMAIN_META } from '@/types/threat'
 import SeverityBadge from '@/components/common/SeverityBadge/SeverityBadge'
 import LoadingState from '@/components/common/LoadingState/LoadingState'
@@ -9,6 +10,8 @@ import ForensicArtifactsTable from '@/components/detail/ForensicArtifactsTable/F
 import TelemetryPanel from '@/components/detail/TelemetryPanel/TelemetryPanel'
 import KqlExplorer from '@/components/detail/KqlExplorer/KqlExplorer'
 import RunbookPanel from '@/components/detail/RunbookPanel/RunbookPanel'
+import SectionNav from '@/components/detail/SectionNav/SectionNav'
+import RelatedScenarios from '@/components/detail/RelatedScenarios/RelatedScenarios'
 import NotFoundView from '@/components/views/NotFoundView/NotFoundView'
 import styles from './ThreatDetailView.module.css'
 
@@ -18,25 +21,30 @@ interface ThreatDetailViewProps {
 
 export default function ThreatDetailView({ id }: ThreatDetailViewProps) {
   const { threats, loading } = useThreats()
+  const threat = getThreatById(threats, id)
+  useDocumentTitle(threat?.title)
 
   if (loading) {
     return <LoadingState label="Loading scenario…" />
   }
-
-  const threat = getThreatById(threats, id)
 
   if (!threat) {
     return <NotFoundView />
   }
 
   const domainMeta = DOMAIN_META[threat.domain]
-  const hasDetail = Boolean(
-    (threat.forensicArtifacts && threat.forensicArtifacts.length > 0) ||
-      threat.telemetry ||
-      threat.kql?.sentinel ||
-      threat.kql?.defender ||
-      threat.runbook,
-  )
+  const hasArtifacts = Boolean(threat.forensicArtifacts && threat.forensicArtifacts.length > 0)
+  const hasTelemetry = Boolean(threat.telemetry)
+  const hasKql = Boolean(threat.kql && (threat.kql.sentinel || threat.kql.defender))
+  const hasRunbook = Boolean(threat.runbook)
+  const hasDetail = hasArtifacts || hasTelemetry || hasKql || hasRunbook
+
+  const sections = [
+    hasArtifacts && { id: 'artifacts', label: 'Artifacts' },
+    hasTelemetry && { id: 'telemetry', label: 'Telemetry' },
+    hasKql && { id: 'kql', label: 'Detection' },
+    hasRunbook && { id: 'runbook', label: 'Runbook' },
+  ].filter((s): s is { id: string; label: string } => Boolean(s))
 
   return (
     <article className={styles.view}>
@@ -61,33 +69,37 @@ export default function ThreatDetailView({ id }: ThreatDetailViewProps) {
         </div>
       )}
 
-      {threat.forensicArtifacts && threat.forensicArtifacts.length > 0 && (
-        <section className={styles.section}>
+      <SectionNav sections={sections} />
+
+      {hasArtifacts && (
+        <section id="artifacts" className={styles.section}>
           <h2 className={styles.sectionLabel}>§ Forensic Artifacts</h2>
-          <ForensicArtifactsTable artifacts={threat.forensicArtifacts} />
+          <ForensicArtifactsTable artifacts={threat.forensicArtifacts!} />
         </section>
       )}
 
-      {threat.telemetry && (
-        <section className={styles.section}>
+      {hasTelemetry && (
+        <section id="telemetry" className={styles.section}>
           <h2 className={styles.sectionLabel}>§ Telemetry</h2>
-          <TelemetryPanel telemetry={threat.telemetry} />
+          <TelemetryPanel telemetry={threat.telemetry!} />
         </section>
       )}
 
-      {threat.kql && (threat.kql.sentinel || threat.kql.defender) && (
-        <section className={styles.section}>
+      {hasKql && (
+        <section id="kql" className={styles.section}>
           <h2 className={styles.sectionLabel}>§ Detection — KQL</h2>
-          <KqlExplorer kql={threat.kql} />
+          <KqlExplorer kql={threat.kql!} />
         </section>
       )}
 
-      {threat.runbook && (
-        <section className={styles.section}>
+      {hasRunbook && (
+        <section id="runbook" className={styles.section}>
           <h2 className={styles.sectionLabel}>§ Response Runbook</h2>
-          <RunbookPanel runbook={threat.runbook} />
+          <RunbookPanel runbook={threat.runbook!} threatId={threat.id} />
         </section>
       )}
+
+      <RelatedScenarios threat={threat} allThreats={threats} />
     </article>
   )
 }

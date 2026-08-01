@@ -91,3 +91,50 @@ ol {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------
+ * Print
+ * A DFIR reference is genuinely likely to get printed mid-incident —
+ * dumping the dark theme onto paper as-is wastes ink and is hard to read.
+ * Switches to a plain light/dark-text layout, hides chrome and anything
+ * that requires a pointer (nav, buttons), and makes sure code blocks stay
+ * legible without relying on background-color contrast, since printers
+ * vary widely in how they render color at all.
+ * --------------------------------------------------------------------- */
+@media print {
+  header,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  a {
+    color: #111;
+    text-decoration: underline;
+  }
+
+  code,
+  pre {
+    background: #f4f4f4 !important;
+    color: #111 !important;
+    border: 1px solid #ccc;
+  }
+
+  /* Checkbox state should still be visible on paper even with the
+     surrounding button/nav suppression above — it's an input, not a
+     button, so the blanket rule above doesn't touch it. */
+  input[type='checkbox'] {
+    display: inline-block !important;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 10px;
+    color: #666;
+  }
+}

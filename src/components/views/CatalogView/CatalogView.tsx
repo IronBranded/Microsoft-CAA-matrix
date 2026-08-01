@@ -1,6 +1,7 @@
 import { useQueryParams, setQueryParams } from '@/lib/router'
 import { getThreatsByDomain } from '@/data/threats'
 import { useThreats } from '@/lib/useThreats'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { searchThreats, filterBySeverity, parseSeverityParam } from '@/lib/filter'
 import { compareSeverity } from '@/lib/severity'
 import { DOMAIN_META, SEVERITIES, type DomainSlug } from '@/types/threat'
@@ -38,6 +39,7 @@ export default function CatalogView({ domain }: CatalogViewProps) {
   )
 
   const heading = domain ? DOMAIN_META[domain].label : 'All Domains'
+  useDocumentTitle(domain ? heading : undefined)
   const focus = domain
     ? DOMAIN_META[domain].focus
     : loading

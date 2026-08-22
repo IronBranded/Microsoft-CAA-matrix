@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       "NSGs default to deny for inbound internet traffic but are frequently left permissive for internal VNet-to-VNet or subnet-to-subnet traffic — the assumption that 'internal' means 'trusted' is exactly what this technique exploits.",
       'A compromised VM reaching internal targets it has no legitimate business reason to reach is the core signal — baseline expected internal communication patterns per VM/subnet role to make deviations visible.',
       'Combine network-layer evidence with host-layer evidence (DeviceLogonEvents on the destination) for the strongest case — network connectivity alone doesn\'t confirm a genuine lateral movement attempt succeeded.',
+      'There is deliberately no relevantErrorCodes entry for this scenario either: NSG Flow Logs record Allow/Deny decisions, not error codes, and a permissive rule allowing lateral movement means the connection succeeds cleanly with no error at all — the absence of any denial is the problem, and that absence doesn\'t show up as a code to alert on.',
     ],
   },
 

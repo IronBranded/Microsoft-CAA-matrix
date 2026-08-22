@@ -30,8 +30,8 @@ const entry: ThreatEntry = {
       artifact: "'Mass download' or 'unusual file access' anomaly detections, particularly volume-based policies on file/message access counts per session",
     },
     {
-      logSourceId: 'unified-audit-log',
-      source: 'OfficeActivity — the Unified Audit Log (UAL)',
+      logSourceId: 'mail-items-accessed',
+      source: 'MailItemsAccessed',
       artifact: 'MailItemsAccessed at anomalously high volume for a short window, consistent with programmatic enumeration rather than a human reading mail',
     },
     {
@@ -50,6 +50,15 @@ const entry: ThreatEntry = {
       'CorrelationId on the originating sign-in: ties bulk API activity back to whichever initial-access technique delivered the token — cross-reference the relevant scenario elsewhere in this matrix.',
       'Client/App ID making the calls: legitimate high-volume automation is usually a small, known set of approved apps — an unrecognized App ID at high volume is the core anomaly signal.',
       'Request rate and endpoint diversity: a human using web/desktop clients naturally paginates and pauses; scripted exfiltration tends toward sustained, mechanically regular request intervals against list/enumerate endpoints specifically.',
+    ],
+    relevantErrorCodes: [
+      {
+        code: 'TooManyRequests',
+        type: 'Microsoft Graph Throttling (HTTP 429)',
+        description: 'Bulk enumeration of mail/files/chats at exfiltration-relevant volume is precisely the kind of sustained request pattern Graph throttling exists to catch, scoped per user+resource.',
+        dfirValue:
+          "A well-built exfiltration tool respects Retry-After and paces itself, so absence of 429s doesn't clear an identity — but a burst of them against list/enumerate endpoints (messages, drive items, chats) for an identity with no history of that volume is a strong, low-effort signal worth alerting on directly rather than only as a secondary corroborator.",
+      },
     ],
   },
 

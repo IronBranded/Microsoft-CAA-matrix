@@ -45,6 +45,16 @@ const entry: ThreatEntry = {
       'Cost anomaly detection often beats security telemetry to this one in practice — treat a finance/billing alert as a legitimate, high-value security signal source, not just a security tool alert.',
       'The compute itself is usually the least interesting part of the incident — the compromised identity/credential that enabled it is the real finding and may have broader implications beyond the mining itself.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'QuotaExceeded',
+        type: 'ARM Deployment Failure',
+        description:
+          "vCPU or per-SKU-family core quota exceeded for the subscription/region. Depending on which specific limit was hit, the code surfaces as QuotaExceeded, OperationNotAllowed, or ResourceQuotaExceeded — all three are worth including in a search, not just the first.",
+        dfirValue:
+          "A blocked deployment is still an attempted one — a burst of quota-exceeded failures for GPU-optimized SKU families in AzureActivity reveals attempted scale even when the attacker never got a single VM actually running. Don't restrict this hunt to successful deployments; the failures are often the earlier and larger signal.",
+      },
+    ],
   },
 
   mitre: [{ id: 'T1496', name: 'Resource Hijacking', tactic: 'Impact' }],

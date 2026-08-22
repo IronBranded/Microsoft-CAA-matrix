@@ -21,6 +21,10 @@ export default function CatalogView({ domain }: CatalogViewProps) {
   const activeSeverities = parseSeverityParam(queryParams.get('severity'), SEVERITIES)
   const viewMode = queryParams.get('view') === 'grid' ? 'grid' : 'table'
 
+  const hasSearch = query.trim() !== ''
+  const hasSeverityFilter = activeSeverities.size > 0
+  const activeFilterCount = (hasSearch ? 1 : 0) + (hasSeverityFilter ? 1 : 0)
+
   function setViewMode(mode: 'grid' | 'table') {
     const params = new URLSearchParams(queryParams)
     if (mode === 'table') {
@@ -28,6 +32,13 @@ export default function CatalogView({ domain }: CatalogViewProps) {
     } else {
       params.set('view', mode)
     }
+    setQueryParams(params)
+  }
+
+  function clearFilters() {
+    const params = new URLSearchParams(queryParams)
+    params.delete('q')
+    params.delete('severity')
     setQueryParams(params)
   }
 
@@ -51,7 +62,14 @@ export default function CatalogView({ domain }: CatalogViewProps) {
       <div className={styles.head}>
         <div>
           <h1 className={styles.heading}>{heading}</h1>
-          <p className={styles.focus}>{focus}</p>
+          <div className={styles.focusRow}>
+            <p className={styles.focus}>{focus}</p>
+            {activeFilterCount > 0 && (
+              <button type="button" className={styles.clearFilters} onClick={clearFilters}>
+                {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active · Clear
+              </button>
+            )}
+          </div>
         </div>
         {!loading && sorted.length > 0 && (
           <div className={styles.viewToggle} role="group" aria-label="View mode">
@@ -80,6 +98,11 @@ export default function CatalogView({ domain }: CatalogViewProps) {
       ) : sorted.length === 0 ? (
         <div className={styles.empty}>
           <p>No scenarios match the current filters.</p>
+          {activeFilterCount > 0 && (
+            <button type="button" className={styles.emptyClear} onClick={clearFilters}>
+              Clear filters
+            </button>
+          )}
         </div>
       ) : viewMode === 'table' ? (
         <ThreatTable threats={sorted} />

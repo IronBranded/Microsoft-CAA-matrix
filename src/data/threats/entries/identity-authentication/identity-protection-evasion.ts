@@ -49,6 +49,7 @@ const entry: ThreatEntry = {
       "This scenario is fundamentally about absence of signal rather than presence — the retrospective question is why Identity Protection didn't catch this, comparing what was available against what a real compromise later revealed.",
       'Residential proxy usage specifically defeats IP-reputation-based detection while doing nothing to defeat behavioral/device-based signals — a sophisticated evasion attempt often still slips up on a device fingerprint inconsistency somewhere in the session.',
       "Manual risk dismissal by an admin is a legitimate, necessary workflow but also a potential attacker lever if the dismissing admin's own account is compromised — verify the dismissal's own legitimacy during any retrospective review.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: successful evasion means none of the codes that would normally signal trouble — AADSTS53003 (Conditional Access block), AADSTS53004 (risk-based registration block), or a risk-driven step-up challenge — ever fire. Their absence is the point, not a gap in this catalog entry.',
     ],
   },
 

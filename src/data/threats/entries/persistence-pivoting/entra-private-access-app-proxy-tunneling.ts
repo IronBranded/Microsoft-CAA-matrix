@@ -40,6 +40,7 @@ const entry: ThreatEntry = {
       'A connector is a durable piece of infrastructure, not a one-time event — treat its continued presence and health status as an ongoing thing to monitor, not just its initial registration.',
       'Connectors are outbound-initiated by design, which is exactly what makes a rogue one hard to spot at the network perimeter — it looks like normal egress traffic to a Microsoft service, not inbound access.',
       'Compare the actual internal targets being reached through Private Access/App Proxy against the documented, intended scope for each published app or segment — scope creep here is the practical version of this technique.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: a connector operating and reaching internal targets is functioning exactly as designed — there is no failure to log. Scope comparison against documented intent is the only detection path.',
     ],
   },
 

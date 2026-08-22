@@ -44,6 +44,16 @@ const entry: ThreatEntry = {
       "Cross-subscription or cross-tenant export destinations are far more suspicious than exports staying within the source's own subscription.",
       'SAS token expiry duration: a short-lived token consistent with a legitimate one-time need looks very different from a long-lived one clearly intended for extended, repeated access.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AuthorizationFailed',
+        type: 'ARM RBAC Denial — Export SAS',
+        description:
+          'Caller lacks Microsoft.Compute/disks/beginGetAccess/action or Microsoft.Compute/snapshots/beginGetAccess/action — the specific permissions needed to generate a SAS URI for export, separate from ordinary read/write access to the disk or snapshot resource itself.',
+        dfirValue:
+          "A custom RBAC role can grant normal disk/snapshot management while omitting just these two actions (and their endGetAccess counterparts) — if your environment does this, a denial here specifically means someone attempted an export, not routine snapshot housekeeping, which makes it a high-confidence signal rather than a noisy one. Also check the disk/snapshot's NetworkAccessPolicy: a DenyAll setting blocks export outright regardless of RBAC, and is worth confirming as a standing control if this technique is a real concern in your environment.",
+      },
+    ],
   },
 
   mitre: [

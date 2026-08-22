@@ -19,8 +19,8 @@ const entry: ThreatEntry = {
       artifact: 'Outbound replies or new messages from the compromised mailbox to external recipients discussing payment, invoicing, or banking details — most reliably found via Message Trace / content search rather than metadata alone, since the fraud lives in the message body',
     },
     {
-      logSourceId: 'unified-audit-log',
-      source: 'OfficeActivity',
+      logSourceId: 'mail-items-accessed',
+      source: 'MailItemsAccessed',
       artifact:
         "MailItemsAccessed events immediately preceding the fraudulent reply, showing the attacker reading an existing invoice/payment thread before crafting a convincing reply into it — this specific event type requires E5 or the Audit (Premium) add-on and isn't available on E3 (see the Acquisition Guide); if the tenant is E3-only, this particular artifact won't exist regardless of how thoroughly you search, and the investigation needs to rely on Message Trace and the surrounding sign-in telemetry instead.",
     },
@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       "This scenario's core evidence is in message CONTENT — payment instructions, bank details, urgency language — which metadata-only KQL against OfficeActivity generally can't see. Purview Content Search or eDiscovery against the mailbox is usually necessary to fully scope it; that's an honest limitation of log-based detection here, not a gap in the queries below.",
       'Look for reply-chain hijacking specifically: the fraudulent message is very often a reply within an existing, legitimate thread rather than a new message, since that inherits the thread\'s credibility.',
       'Timing correlation between MailItemsAccessed and an outbound Send, especially outside the mailbox owner\'s normal working hours, is a reasonable metadata-only proxy signal even without reading content.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: the fraudulent message sends successfully from a genuine, authenticated mailbox — nothing about the mail flow fails or looks technically anomalous. Content and pattern review, not a failure code, is what catches this.',
     ],
   },
 

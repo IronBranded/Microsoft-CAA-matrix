@@ -50,6 +50,23 @@ const entry: ThreatEntry = {
       'auth_time / iat claim analysis on a captured token pinpoints the original theft moment, the same technique used for device code phishing and AiTM.',
       "If the target resource supports Continuous Access Evaluation, a stolen token can actually have a longer useful lifetime for the attacker than the pre-CAE default (up to 28 hours rather than the standard 60-90 minutes), since CAE trades shorter default expiry for real-time backchannel revocation — but that revocation only helps if something actually triggers it (password reset, session revoke, risk detection). A stolen CAE token that never trips a revocation event outlives what most responders would assume is the token's natural expiry.",
     ],
+    relevantErrorCodes: [
+      {
+        code: '401 + claims challenge',
+        type: 'Continuous Access Evaluation',
+        description:
+          "Not an AADSTS code — a resource-provider-level HTTP 401 carrying a WWW-Authenticate header with a claims challenge, returned by CAE-enabled resources (Exchange Online, SharePoint, Teams, Graph) when they've received a revocation event for the token being presented.",
+        dfirValue:
+          "This is your real-time confirmation that containment landed on a CAE-protected resource: within roughly 15 minutes of revoking sessions or resetting the password, a still-active stolen token being replayed against Exchange/SharePoint/Graph should start drawing this response instead of succeeding. Both the client and the resource must be CAE-capable for this to apply — plenty of older or third-party clients aren't, in which case the token simply keeps working until natural expiry regardless of containment actions taken.",
+      },
+      {
+        code: 'AADSTS50173',
+        type: 'Revoked Grant',
+        description: "The provided grant has expired due to it being revoked — fires when a token's issue time predates the account's TokensValidFrom timestamp.",
+        dfirValue:
+          'The token-issuance-side counterpart to the CAE response above: if the attacker\'s tooling tries to mint a *new* access token from a stolen refresh token after containment, this is what it gets back. Same containment-confirmation role as AADSTS70020 plays for device code phishing elsewhere in this matrix.',
+      },
+    ],
   },
 
   mitre: [

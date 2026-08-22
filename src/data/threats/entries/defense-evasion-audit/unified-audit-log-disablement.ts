@@ -50,6 +50,7 @@ const entry: ThreatEntry = {
       "The disablement and any subsequent re-enablement — attackers sometimes flip it back on briefly to avoid 'audit log disabled for N days' alerting — both land in the same separate audit pipeline. Search for both events bracketing the OfficeActivity gap.",
       "Actor's role at time of action: this requires Exchange Administrator or Global Administrator — cross-reference the account's PIM activation history if the privilege itself was only recently obtained.",
       'OfficeActivity coverage gap: rather than searching FOR an event, search for the boundary where events STOP — bin event counts hourly and look for a cliff-edge drop to zero.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: Set-AdminAuditLogConfig succeeds cleanly for an Exchange/Global Administrator, exactly as described above — that success is the entire threat, not a failure anywhere in the chain.',
     ],
   },
 

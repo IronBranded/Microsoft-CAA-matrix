@@ -77,7 +77,7 @@ export default function ThreatTable({ threats }: ThreatTableProps) {
             <th className={styles.sortable} {...headerProps('domain')}>
               Domain
             </th>
-            <th>Category</th>
+            <th className={styles.categoryCol}>Category</th>
             <th className={styles.centerCol}>Frameworks</th>
           </tr>
         </thead>
@@ -98,7 +98,7 @@ export default function ThreatTable({ threats }: ThreatTableProps) {
                   </Link>
                 </td>
                 <td className={styles.mutedCell}>{DOMAIN_META[threat.domain].label}</td>
-                <td className={styles.mutedCell}>{threat.category}</td>
+                <td className={`${styles.mutedCell} ${styles.categoryCol}`}>{threat.category}</td>
                 <td className={styles.centerCol}>
                   <span className={styles.frameworkCount}>{frameworkCount || '—'}</span>
                 </td>

@@ -45,6 +45,16 @@ const entry: ThreatEntry = {
       'Issuing admin identity: was this issued by a help desk account with a normal, auditable justification, or does the issuance itself look anomalous for that admin?',
       'TAP lifetime and reuse settings directly determine exposure window — check tenant policy for how long TAPs are valid and whether they are single-use by default.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS53010',
+        type: 'Location/Device-Restricted Registration',
+        description:
+          "ProofUpBlockedDueToSecurityInfoAcr — the same control that gates FIDO2/passkey registration elsewhere in this matrix applies here too, since redeeming a TAP to register a new MFA method is itself a registration event. If the tenant requires registration from a trusted location/device, a remote attacker holding only a social-engineered TAP still can't complete it.",
+        dfirValue:
+          "Confirms whether this specific containment control is actually in place before assuming a TAP-driven registration attempt succeeded versus was blocked. If your tenant doesn't have this restriction configured, a valid TAP is sufficient on its own — there's nothing here to detect the misuse, only the TAP issuance event itself.",
+      },
+    ],
   },
 
   mitre: [

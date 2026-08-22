@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       'Dynamic AU membership rules are declarative and can silently expand scope as new objects are created that happen to match the rule — review rule logic itself, not just a point-in-time membership snapshot.',
       "A scoped admin role's real reach is the intersection of the role's inherent permissions and the AU's membership — a change to either side changes effective scope.",
       'Restricted management AUs are meaningfully more isolated than standard ones — confirm which type is in use before assuming a given AU provides strong isolation.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: exploiting an overly broad AU boundary is a successful use of permissions the attacker was, on paper, actually granted — there is no denial to log. AuditLogs showing what a scoped admin touched, cross-referenced against the AU\'s intended boundary, is the whole detection story.',
     ],
   },
 

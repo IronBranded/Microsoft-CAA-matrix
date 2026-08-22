@@ -43,6 +43,7 @@ const entry: ThreatEntry = {
       "The federated credential's subject identifier is the entire security boundary here — review its exact pattern rather than assuming federation itself is inherently safe.",
       "No client secret is ever generated or leaked in this technique — the 'credential' is the trust relationship configuration itself, which is why this is a configuration-review problem more than a secret-hunting one.",
       "Cross-reference Entra ID sign-in activity via the federated credential against the external platform's own logs — a token issued for a workflow run the external platform has no record of is the clearest sign of exploitation.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: a federated credential configured too broadly means an out-of-scope workflow run successfully exchanges its token for a valid Entra ID token — a fully successful, intended-to-work token issuance from Entra ID\'s perspective. The misconfiguration is what makes it exploitable, not any error in the flow itself.',
     ],
   },
 

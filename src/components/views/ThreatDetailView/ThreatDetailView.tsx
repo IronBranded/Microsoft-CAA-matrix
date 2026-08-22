@@ -48,9 +48,13 @@ export default function ThreatDetailView({ id }: ThreatDetailViewProps) {
 
   return (
     <article className={styles.view}>
-      <Link to={`/domain/${threat.domain}`} className={styles.back}>
-        ← {domainMeta.label}
-      </Link>
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <Link to="/">All Domains</Link>
+        <span className={styles.crumbSep} aria-hidden="true">/</span>
+        <Link to={`/domain/${threat.domain}`}>{domainMeta.label}</Link>
+        <span className={styles.crumbSep} aria-hidden="true">/</span>
+        <span className={styles.crumbCurrent} aria-current="page">{threat.title}</span>
+      </nav>
 
       <header className={styles.header}>
         <div className={styles.headerTop}>

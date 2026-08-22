@@ -47,6 +47,16 @@ const entry: ThreatEntry = {
       'PRTs are meant to be non-exportable when TPM-backed — successful extraction is far more likely from an unmanaged or non-TPM device than from a properly Windows Hello for Business-protected one.',
       "The session key protecting the PRT is often extractable alongside it — tooling that dumps one usually dumps both, since the PRT alone can't be used to request new tokens without it.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS50173',
+        type: 'Revoked Grant',
+        description:
+          "The provided grant has expired due to it being revoked — a fresh auth is needed. Fires when a token's issue time predates the account's TokensValidFrom timestamp, which containment actions like a password reset advance.",
+        dfirValue:
+          "This is your containment-confirmation signal, the same role AADSTS70020 plays for stolen access tokens elsewhere in this matrix: after resetting the compromised user's password, watch for this code from the attacker's infrastructure attempting to keep using the extracted PRT. Its appearance confirms the token is now dead; its absence after containment means either the attacker has stopped trying or is using something a password reset doesn't invalidate.",
+      },
+    ],
   },
 
   mitre: [

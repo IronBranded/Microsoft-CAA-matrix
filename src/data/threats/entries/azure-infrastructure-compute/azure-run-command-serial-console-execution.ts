@@ -45,6 +45,16 @@ const entry: ThreatEntry = {
       "CorrelationId on the AzureActivity entry ties the RunCommand call back to the caller's broader session — pivot into what else that identity did in the same window.",
       "A caller with only Contributor, not Owner, can still execute Run Command — don't assume lower RBAC roles are lower-risk for this specific action.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AuthorizationFailed',
+        type: 'ARM RBAC Denial',
+        description:
+          "Generic ARM authorization error (HTTP 403) — the code string alone doesn't say which action was denied. For this scenario, check the message body for Microsoft.Compute/virtualMachines/runCommand/action or Microsoft.SerialConsole/serialPorts/connect/action specifically.",
+        dfirValue:
+          "A denied attempt in AzureActivity still proves intent and identifies the caller, even though the command or console session never actually ran — don't filter this hunt to successful calls only. Serial Console is the higher-value one to catch: it bypasses the guest OS entirely, so a successful connection can leave nothing in DeviceLogonEvents at all. Mandiant has documented exactly this in the wild — Serial Console abused to install third-party remote-management software specifically because it evades endpoint-side detection.",
+      },
+    ],
   },
 
   mitre: [

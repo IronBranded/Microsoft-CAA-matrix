@@ -52,6 +52,7 @@ const entry: ThreatEntry = {
       'This is closely related to Unified Audit Log Disablement and Diagnostic Log Stream Poisoning elsewhere in this domain — all three share the same underlying pattern but target different components; check all three when investigating any one.',
       'Suppression is often narrow and targeted — one sensor, one connector — specifically to avoid the kind of obvious, tenant-wide outage that would draw immediate attention.',
       'Cross-reference the timing of any suppression against other suspicious activity on the same host/resource — like the other defense-evasion entries in this domain, this is cover for something else, not usually the end goal itself.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: disabling a connector or sensor with sufficient admin rights is a normal, successful configuration change. The admin audit trail plus timing correlation is the only signal, same as the other two entries in this domain.',
     ],
   },
 

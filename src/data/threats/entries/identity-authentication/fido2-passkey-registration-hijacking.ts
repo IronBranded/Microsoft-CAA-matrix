@@ -48,6 +48,23 @@ const entry: ThreatEntry = {
       "FIDO2/passkey registration, once complete, is itself now a valid, phishing-resistant-looking credential from Entra ID's perspective — this is what makes it durable persistence rather than a temporary foothold.",
       "Compare the newly-registered method's metadata against your organization's approved hardware key inventory, where such an inventory is maintained.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS53004',
+        type: 'Risk-Based Registration Block',
+        description: 'ProofUpBlockedDueToRisk — the session is flagged risky enough that Identity Protection blocks registering a new authentication method until the risk is resolved.',
+        dfirValue:
+          "Confirms Identity Protection risk scoring caught the session before the attacker could complete registration — a strong containment signal if you see this immediately followed by no successful registration. Its absence proves nothing on its own: this only fires if the session actually scored as risky, and a patient or well-blended attacker may not trip it at all.",
+      },
+      {
+        code: 'AADSTS53010',
+        type: 'Location/Device-Restricted Registration',
+        description:
+          'ProofUpBlockedDueToSecurityInfoAcr — the tenant requires authentication method registration to happen from a specific trusted location or device, and this session doesn\'t qualify.',
+        dfirValue:
+          'Where configured, this is a genuinely strong control: an attacker with only a stolen session token, not physical presence on a trusted network/device, cannot complete registration even after passing MFA. Worth checking whether this restriction is actually in place before assuming a registration event represents a real compromise versus a blocked attempt.',
+      },
+    ],
   },
 
   mitre: [

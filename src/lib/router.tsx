@@ -10,14 +10,15 @@ import {
 /**
  * A small, dependency-free hash router.
  *
- * This app only needs three route shapes ("/", "/domain/:slug",
- * "/threat/:id") with no nested routes, loaders, or server rendering — not
- * enough surface to justify a routing library. react-router-dom in
- * particular has had a run of high-severity advisories through 2026
- * (RSC-mode CSRF, XSS via redirects, SSR issues); none apply to a static,
- * client-only SPA like this one, but there's no reason to carry the
- * dependency (or its churn) for three patterns a ~60-line file can own
- * outright, fully auditable in one read.
+ * This app only needs four route shapes ("/", "/domain/:slug",
+ * "/threat/:id", plus flat top-level pages like "/acquisition" and
+ * "/identity-pillars") with no nested routes, loaders, or server
+ * rendering — not enough surface to justify a routing library.
+ * react-router-dom in particular has had a run of high-severity advisories
+ * through 2026 (RSC-mode CSRF, XSS via redirects, SSR issues); none apply
+ * to a static, client-only SPA like this one, but there's no reason to
+ * carry the dependency (or its churn) for a handful of patterns a
+ * ~60-line file can own outright, fully auditable in one read.
  */
 
 export interface RouteState {

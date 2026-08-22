@@ -43,6 +43,16 @@ const entry: ThreatEntry = {
       "A flow mixing a business-data connector with an HTTP or personal-cloud connector in the same flow is the classic exfiltration pattern — DLP policies are specifically designed to block exactly this combination.",
       "Flow ownership can be reassigned and flows can run under a service account context — verify which identity's permissions the flow actually executes with, which may differ from who created it.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'Suspended',
+        type: 'DLP Policy Violation (Flow Status)',
+        description:
+          "Not an AADSTS/ARM code — a flow status. Power Automate marks a flow Suspended, rather than blocking its creation outright, when it combines connectors from data groups (Business/Non-business/Blocked) that a DLP policy doesn't allow together. The flow saves successfully and only stops running at that point.",
+        dfirValue:
+          "A flow that WAS running and then went Suspended is a strong signal someone tightened DLP policy specifically in response to it — worth checking who changed the policy and when relative to the flow's creation. Conversely, an exfiltration-shaped flow that's still active despite mixing a business connector with HTTP/personal-cloud connectors means either no DLP policy blocks that combination in this environment, or the flow predates the policy and hasn't been re-evaluated — Power Platform's enforcement is polling-based, not instantaneous.",
+      },
+    ],
   },
 
   mitre: [

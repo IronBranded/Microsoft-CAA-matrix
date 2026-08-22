@@ -44,6 +44,15 @@ const entry: ThreatEntry = {
       "Baseline your tenant's actual normal UserAgent population first — what counts as abnormal is relative to your own traffic, not a universal list.",
       'Combine UserAgent anomaly with volume/velocity and endpoint-diversity signals for a stronger composite signal than UserAgent alone.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'TooManyRequests',
+        type: 'Microsoft Graph Throttling (HTTP 429)',
+        description: 'Scripted tooling with a generic or absent User-Agent is also frequently unaware of, or indifferent to, Graph throttling limits — driving straight into 429s rather than pacing requests the way a mature SDK-based client would.',
+        dfirValue:
+          "A combination of unusual UserAgent AND throttling responses is a stronger composite signal than either alone — legitimate low-quality scripts exist too, but the pairing narrows the field considerably. Check whether the same identity's *normal* traffic also gets throttled regularly before treating this as anomalous; some legitimate integrations are simply chatty.",
+      },
+    ],
   },
 
   mitre: [{ id: 'T1550.001', name: 'Use Alternate Authentication Material: Application Access Token', tactic: 'Defense Evasion' }],

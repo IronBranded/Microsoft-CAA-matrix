@@ -14,9 +14,11 @@ import { pathToFileURL } from 'node:url'
 import { ZodError } from 'zod'
 import { ThreatEntrySchema } from '../src/types/threat'
 import type { LogSource } from '../src/types/logSource'
+import type { IdentityPillar } from '../src/types/identityPillar'
 
 const ENTRIES_ROOT = join(import.meta.dirname, '..', 'src', 'data', 'threats', 'entries')
 const LOG_SOURCES_PATH = join(import.meta.dirname, '..', 'src', 'data', 'logSources', 'index.ts')
+const IDENTITY_PILLARS_PATH = join(import.meta.dirname, '..', 'src', 'data', 'identityPillars', 'index.ts')
 
 function findEntryFiles(dir: string): string[] {
   const files: string[] = []
@@ -116,10 +118,50 @@ async function validateLogSources(): Promise<number> {
   return errorCount
 }
 
+async function validateIdentityPillars(): Promise<number> {
+  const relPath = relative(process.cwd(), IDENTITY_PILLARS_PATH)
+  console.log(`\nValidating src/data/identityPillars/index.ts.\n`)
+
+  // Same pattern as validateLogSources: the module calls
+  // IdentityPillarListSchema.parse() at the top level, so an invalid entry
+  // throws on import rather than returning an inspectable result.
+  let pillars: IdentityPillar[]
+  try {
+    const mod = await import(pathToFileURL(IDENTITY_PILLARS_PATH).href)
+    pillars = mod.identityPillars
+  } catch (err) {
+    console.error(`✗ ${relPath}`)
+    if (err instanceof ZodError) {
+      for (const issue of err.issues) {
+        console.error(`    ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      }
+    } else {
+      console.error(`    ${err instanceof Error ? err.message : String(err)}`)
+    }
+    console.log(`\n0/? identity pillar(s) passed validation.`)
+    return 1
+  }
+
+  let errorCount = 0
+  const seenIds = new Set<string>()
+  for (const pillar of pillars) {
+    if (seenIds.has(pillar.id)) {
+      errorCount++
+      console.error(`✗ ${relPath}`)
+      console.error(`    duplicate identity pillar id "${pillar.id}"`)
+    }
+    seenIds.add(pillar.id)
+  }
+
+  console.log(`${pillars.length - errorCount}/${pillars.length} identity pillar(s) passed validation.`)
+  return errorCount
+}
+
 async function main() {
   const threatErrors = await validateThreats()
   const logSourceErrors = await validateLogSources()
-  const totalErrors = threatErrors + logSourceErrors
+  const identityPillarErrors = await validateIdentityPillars()
+  const totalErrors = threatErrors + logSourceErrors + identityPillarErrors
 
   if (totalErrors > 0) {
     console.error(`\n${totalErrors} item(s) failed validation. See details above.`)

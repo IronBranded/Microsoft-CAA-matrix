@@ -40,6 +40,7 @@ const entry: ThreatEntry = {
       'This vulnerability class exists entirely outside Entra ID/M365 telemetry until and unless it is leveraged toward a tenant-level action — DNS hygiene is the actual preventive control, not log monitoring.',
       'Certificate Transparency logs are a genuinely useful, free, external early-warning source for this specific class of issue, since anyone claiming a dangling subdomain typically needs a certificate for it.',
       'An unverified custom domain sitting in a tenant\'s domain list indefinitely is a specific, checkable configuration state worth periodic review, distinct from the DNS-dangling-record variant.',
+      'There is deliberately no relevantErrorCodes entry for this scenario, consistent with the description above: the takeover itself happens entirely at the DNS/CA layer, outside anything Entra ID logs at all, until and unless it is later leveraged toward an in-tenant action.',
     ],
   },
 

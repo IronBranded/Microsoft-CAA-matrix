@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       "Transport rules apply org-wide and silently — unlike an inbox rule, there's no mailbox-owner-visible artifact at all; the admin audit trail and the rule's own configuration are the only places this is visible.",
       'Rule priority and enabled state matter — a rule can be created disabled, or ordered to fire only after other rules, both ways to keep it dormant or narrowly effective without drawing attention during a cursory review of active rules.',
       'CorrelationId on the New-TransportRule/Set-TransportRule event ties back to the admin session that created it, establishing whether that session\'s other activity looks legitimate.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: creating a transport rule with sufficient Exchange Administrator rights is a normal, successful administrative action. The admin audit trail is the only artifact, not a failure code.',
     ],
   },
 

@@ -48,6 +48,7 @@ const entry: ThreatEntry = {
       'ForwardingSmtpAddress vs. ForwardingAddress on Set-Mailbox: ForwardingSmtpAddress takes a raw external SMTP address (most common in BEC); ForwardingAddress must resolve to a recipient object in the org.',
       'DeliverToMailboxAndForward flag: if false, the legitimate user never receives a copy at all — the forward is the only delivery, making the compromise fully invisible from the mailbox alone.',
       "Tenant-wide automatic forwarding to external domains is blocked by default in current Exchange Online configurations — if a forward to an external address succeeded at all, either an org-wide exception/allow policy exists, or the specific mailbox has an explicit override. Check the outbound spam filter policy's external forwarding setting before assuming the mailbox-level rule alone explains how the mail actually left the tenant.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: the outbound-forwarding control above is real and worth checking, but it surfaces as a policy setting to inspect, not a numbered error to hunt for. A blocked forward simply never leaves — no error is logged for the attacker to trip.',
     ],
   },
 

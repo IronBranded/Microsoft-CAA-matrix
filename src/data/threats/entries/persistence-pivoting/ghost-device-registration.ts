@@ -48,6 +48,21 @@ const entry: ThreatEntry = {
       "A device object's DeviceId is the durable pivot to trace everywhere that device was subsequently used to satisfy Conditional Access.",
       'This technique is almost always a second stage — trace the registering session backward to how that access was originally obtained.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS53000',
+        type: 'Device Compliance Requirement',
+        description: "DeviceNotCompliant — Conditional Access requires a compliant device, and this one isn't.",
+        dfirValue:
+          "A registered device object failing this specifically because it was never actually enrolled with Intune (or another approved MDM) is the tell that reveals a 'ghost' registration for what it is — real managed devices satisfy this cleanly. A burst of these from one identity, immediately after a new device registration, is worth investigating even though each individual failure looks routine.",
+      },
+      {
+        code: 'AADSTS53001',
+        type: 'Domain-Join Requirement',
+        description: "DeviceNotDomainJoined — Conditional Access requires a domain-joined device, and this one isn't.",
+        dfirValue: 'Same tell as AADSTS53000 above, for tenants whose Conditional Access policy checks hybrid/domain-join specifically rather than Intune compliance.',
+      },
+    ],
   },
 
   mitre: [{ id: 'T1098.005', name: 'Account Manipulation: Device Registration', tactic: 'Persistence' }],

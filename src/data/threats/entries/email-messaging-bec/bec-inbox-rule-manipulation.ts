@@ -56,6 +56,7 @@ const entry: ThreatEntry = {
       'Rule scope precision is informative: a rule targeting one specific external domain or a handful of keywords is far more likely deliberate fraud-concealment than a broad, generic rule.',
       "DeleteMessage is more aggressive than MoveToFolder — the former destroys the user's own visibility entirely, subject to Deleted Items recovery windows, while the latter merely relocates it.",
       "If the underlying compromise fits a payroll-fraud pattern, check for a second persistence mechanism alongside the inbox rule: attacker-controlled phone numbers enrolled as MFA devices is a documented technique in this category — on the Entra account directly, or on the HR platform's own MFA settings (e.g., Duo) if the platform manages authentication separately from Entra ID. A removed inbox rule with this left in place is not actually contained.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: creating a mailbox rule the user owns full rights to create is a normal, successful action — nothing fails. Rule scope and content are the only signal.',
     ],
   },
 

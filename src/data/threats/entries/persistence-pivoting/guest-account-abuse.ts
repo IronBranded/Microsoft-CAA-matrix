@@ -47,6 +47,7 @@ const entry: ThreatEntry = {
       'Guest accounts often fall outside the same lifecycle processes built for internal accounts — this gap, not any single technical control failure, is usually the actual root cause.',
       'A long-dormant guest account suddenly active is a strong signal regardless of what it is doing, given how much less scrutiny guest activity typically receives day to day.',
       'Guest access scope should map to a specific, documented collaboration purpose — access broader than that purpose, even if technically authorized at some point, is worth periodic re-justification.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: using an already-existing, already-invited guest account is a normal successful sign-in — there is no failure event distinguishing it from legitimate collaboration. Dormancy-then-activity and scope-versus-purpose review are the only detection paths.',
     ],
   },
 

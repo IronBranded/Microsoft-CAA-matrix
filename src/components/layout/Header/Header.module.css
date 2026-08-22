@@ -92,8 +92,60 @@
   border-bottom-color: var(--signal);
 }
 
+.iconBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--radius-sm);
+  color: var(--chrome-text-muted);
+  cursor: pointer;
+}
+.iconBtn:hover {
+  color: var(--chrome-text);
+  border-color: var(--signal);
+}
+
+.mobileSearchRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.mobileSearchRow > :first-child {
+  flex: 1;
+}
+
 @media (max-width: 860px) {
   .search {
     display: none;
+  }
+
+  .navToggle,
+  .mobileSearchToggle {
+    display: flex;
+  }
+
+  .count {
+    display: none;
+  }
+
+  .repoLink {
+    display: none;
+  }
+
+  .brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .brandTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

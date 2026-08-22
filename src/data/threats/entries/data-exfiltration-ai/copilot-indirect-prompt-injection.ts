@@ -41,6 +41,7 @@ const entry: ThreatEntry = {
       "This is a newer attack class without mature, standardized log-based detection — the queries below cover what IS realistically detectable (the planted content itself, and gross usage patterns), not a complete detection story the way most other entries in this matrix offer.",
       'The injected content has to actually get retrieved to matter — a poisoned document sitting unread is inert; correlate suspicious content discovery with evidence it was actually part of a Copilot grounding context.',
       "Because Copilot only surfaces content the querying user already has permission to access, this technique doesn't grant new access on its own — it manipulates what a user with legitimate access ends up seeing or being told.",
+      'There is deliberately no relevantErrorCodes entry for this scenario, consistent with the detection-maturity caveat above: a successful injection is Copilot correctly retrieving and grounding on content it had every right to retrieve — nothing fails or errors.',
     ],
   },
 

@@ -12,11 +12,29 @@ import { z } from 'zod'
 export const AcquisitionPrioritySchema = z.enum(['critical', 'high', 'medium', 'low'])
 export type AcquisitionPriority = z.infer<typeof AcquisitionPrioritySchema>
 
+export const CommandTypeSchema = z.enum(['powershell', 'graph-api', 'azure-cli', 'kql'])
+export type CommandType = z.infer<typeof CommandTypeSchema>
+
+export const AcquisitionMethodSchema = z.object({
+  /**
+   * Ordered, concrete steps to actually go get this source's data — not
+   * licensing context (that's `notes` below), the literal mechanics: which
+   * portal blade, which cmdlet, which API. This is the field the guide's
+   * name promised and previously didn't have.
+   */
+  steps: z.array(z.string().min(1)).min(1),
+  /** Copy-pasteable command where a genuine one exists — not every source has one (some are portal-toggle-only). */
+  command: z.string().optional(),
+  commandType: CommandTypeSchema.optional(),
+})
+export type AcquisitionMethod = z.infer<typeof AcquisitionMethodSchema>
+
 export const LogSourceSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'id must be kebab-case'),
   name: z.string().min(1),
   priority: AcquisitionPrioritySchema,
   licenseRequirement: z.string().min(1),
+  acquisition: AcquisitionMethodSchema,
   /**
    * Optional caveat, correction, or additional context — used in particular
    * to flag where a commonly-repeated figure turned out to be outdated or

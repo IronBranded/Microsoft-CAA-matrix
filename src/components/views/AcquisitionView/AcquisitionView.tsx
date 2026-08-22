@@ -4,13 +4,15 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { logSources } from '@/data/logSources'
 import { compareSeverity } from '@/lib/severity'
 import PriorityBadge from '@/components/common/PriorityBadge/PriorityBadge'
+import CopyButton from '@/components/common/CopyButton/CopyButton'
 import styles from './AcquisitionView.module.css'
 
 /**
  * The Artifact Acquisition Guide — what most threat maps skip: whether you
- * can actually collect the evidence a given entry asks for. The 58 threat
- * entries assume their forensic artifacts exist; this view is the reality
- * check underneath that assumption, license tier by license tier.
+ * can actually collect the evidence a given entry asks for, and concretely
+ * how. The 58 threat entries assume their forensic artifacts exist; this
+ * view is the reality check underneath that assumption — licensing gates,
+ * and the actual portal path, cmdlet, or API call to go get each source.
  */
 export default function AcquisitionView() {
   useDocumentTitle('Acquisition Guide')
@@ -34,7 +36,7 @@ export default function AcquisitionView() {
         <h1 className={styles.heading}>Artifact Acquisition Guide</h1>
         <p className={styles.focus}>
           {sorted.length} log sources — what most threat maps skip entirely: whether you can actually collect the
-          evidence, given your licensing
+          evidence, what license gates it, and the concrete steps to go get it
         </p>
       </div>
 
@@ -44,7 +46,8 @@ export default function AcquisitionView() {
             <tr>
               <th className={styles.priorityCol}>Priority</th>
               <th className={styles.sourceCol}>Log Source</th>
-              <th>License Requirement</th>
+              <th className={styles.licenseCol}>License Requirement</th>
+              <th>How to Acquire</th>
             </tr>
           </thead>
           <tbody>
@@ -54,9 +57,22 @@ export default function AcquisitionView() {
                   <PriorityBadge priority={source.priority} />
                 </td>
                 <td className={styles.sourceCol}>{source.name}</td>
-                <td>
+                <td className={styles.licenseCol}>
                   <div className={styles.requirement}>{source.licenseRequirement}</div>
                   {source.notes && <div className={styles.notes}>{source.notes}</div>}
+                </td>
+                <td>
+                  <ol className={styles.steps}>
+                    {source.acquisition.steps.map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
+                  </ol>
+                  {source.acquisition.command && (
+                    <div className={styles.commandBlock}>
+                      <code className={styles.command}>{source.acquisition.command}</code>
+                      <CopyButton text={source.acquisition.command} />
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

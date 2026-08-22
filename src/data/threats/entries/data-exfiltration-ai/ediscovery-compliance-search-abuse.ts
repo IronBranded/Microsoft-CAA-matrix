@@ -43,6 +43,7 @@ const entry: ThreatEntry = {
       "Search scope is the single most informative signal — a search targeting the CEO's mailbox, all Finance mailboxes, or the entire tenant deserves more scrutiny than one scoped to a single named custodian consistent with a specific case.",
       'The search creation and the export are separate steps — a search alone doesn\'t move data anywhere; watch specifically for New-ComplianceSearchAction with an Export type to catch the actual exfiltration moment.',
       "Cross-reference against your organization's actual legal/HR case tracking — a compliance search with no corresponding case record is the core anomaly, since the tooling itself can't distinguish legitimate from abusive use.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: an eDiscovery Manager running a search and export they are technically entitled to run succeeds cleanly every time — scope and case-record cross-reference are the only signal.',
     ],
   },
 

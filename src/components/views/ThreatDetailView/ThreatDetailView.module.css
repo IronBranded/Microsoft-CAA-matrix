@@ -2,17 +2,35 @@
   max-width: var(--content-max-width);
 }
 
-.back {
-  display: inline-block;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--paper-muted);
-  text-decoration: none;
+  color: var(--paper-faint);
   margin-bottom: var(--space-5);
 }
 
-.back:hover {
+.breadcrumb a {
+  color: var(--paper-muted);
+  text-decoration: none;
+}
+.breadcrumb a:hover {
   color: var(--signal);
+}
+
+.crumbSep {
+  color: var(--paper-faint);
+}
+
+.crumbCurrent {
+  color: var(--paper);
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header {

@@ -40,6 +40,7 @@ const entry: ThreatEntry = {
       'The real cost of this gap only becomes visible in retrospect, when another scenario in this domain goes undetected longer than it should have specifically because no continuous monitoring existed.',
       'User consent settings and app governance tooling are complementary — tightening one without the other leaves a partial gap.',
       'The Advanced Hunting proxy below depends on a specific connector, not just a Defender license: Defender for Cloud Apps > App connectors > Microsoft 365 activities has to be enabled, or CloudAppEvents holds no Office 365 audit data regardless of licensing.',
+      'There is deliberately no relevantErrorCodes entry for this scenario, consistent with its posture-gap framing above: there is no attacker action to fail or succeed, only an absence of governance capacity to measure.',
     ],
   },
 

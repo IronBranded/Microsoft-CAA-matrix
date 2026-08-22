@@ -48,6 +48,23 @@ const entry: ThreatEntry = {
       "Resource ID of the source VM: confirms which specific compute resource's identity was used, especially important if a user-assigned identity is shared across multiple resources.",
       "IMDS requests always have 169.254.169.254 as the DESTINATION, not source — filter DeviceNetworkEvents on RemoteIP == '169.254.169.254' to find the requesting process on the VM itself.",
     ],
+    relevantErrorCodes: [
+      {
+        code: '400 Bad Request',
+        type: 'IMDS Response',
+        description:
+          '"Required metadata header not specified" — IMDS rejects any request missing the Metadata: true header.',
+        dfirValue:
+          "Only useful if you can capture the SSRF-vulnerable application's own request/error logs — IMDS calls themselves generate no Azure platform-level log regardless of outcome. Also not a control to lean on: the header requirement isn't enforced consistently across every IMDS endpoint, and is bypassable if the attacker controls request headers, e.g. via a CRLF injection in the vulnerable app. Treat a header check as a speed bump, not proof a request came from legitimate in-VM code.",
+      },
+      {
+        code: 'AADSTS53003',
+        type: 'Conditional Access — Workload Identity',
+        description: '"Access has been blocked by Conditional Access policies" for a service principal / managed identity sign-in.',
+        dfirValue:
+          'Only fires if Conditional Access for Workload Identities (requires Workload ID Premium) is actually configured and scoped to this managed identity — most tenants have nothing here, so its absence proves nothing either way. Where it IS configured, it is a strong signal: a stolen token replayed from outside the policy\'s allowed locations or networks will trip it, visible in AADManagedIdentitySignInLogs — and is worth deploying as a containment measure going forward if this scenario is a live concern.',
+      },
+    ],
   },
 
   mitre: [

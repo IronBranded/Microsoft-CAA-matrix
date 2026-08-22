@@ -34,11 +34,21 @@ interface DomainStats {
   sentinelOnly: string[]
   defenderOnly: string[]
   noKql: string[]
-  noErrorCodes: string[]
+  noErrorCodesDocumented: string[]
+  noErrorCodesUnreviewed: string[]
 }
 
 function emptyStats(): DomainStats {
-  return { total: 0, stub: [], dualKql: [], sentinelOnly: [], defenderOnly: [], noKql: [], noErrorCodes: [] }
+  return {
+    total: 0,
+    stub: [],
+    dualKql: [],
+    sentinelOnly: [],
+    defenderOnly: [],
+    noKql: [],
+    noErrorCodesDocumented: [],
+    noErrorCodesUnreviewed: [],
+  }
 }
 
 function mergeInto(totals: DomainStats, stats: DomainStats) {
@@ -48,7 +58,23 @@ function mergeInto(totals: DomainStats, stats: DomainStats) {
   totals.sentinelOnly.push(...stats.sentinelOnly)
   totals.defenderOnly.push(...stats.defenderOnly)
   totals.noKql.push(...stats.noKql)
-  totals.noErrorCodes.push(...stats.noErrorCodes)
+  totals.noErrorCodesDocumented.push(...stats.noErrorCodesDocumented)
+  totals.noErrorCodesUnreviewed.push(...stats.noErrorCodesUnreviewed)
+}
+
+/**
+ * An entry with zero relevantErrorCodes is either genuinely unreviewed, or
+ * it's been looked at and there's deliberately nothing to put there (e.g.
+ * AiTM: a well-executed proxy produces a normal successful sign-in with no
+ * distinguishing code). The convention for the latter, used consistently
+ * wherever it applies, is a correlationMarkers entry starting with this
+ * phrase — detected here so the report doesn't keep flagging reviewed,
+ * intentionally-empty entries as if they were still open work.
+ */
+const DELIBERATE_ABSENCE_MARKER = 'deliberately no relevantErrorCodes'
+
+function hasDocumentedAbsence(correlationMarkers: string[] | undefined): boolean {
+  return (correlationMarkers ?? []).some((m) => m.includes(DELIBERATE_ABSENCE_MARKER))
 }
 
 async function main() {
@@ -81,7 +107,11 @@ async function main() {
     else stats.noKql.push(t.id)
 
     if (!t.telemetry?.relevantErrorCodes || t.telemetry.relevantErrorCodes.length === 0) {
-      stats.noErrorCodes.push(t.id)
+      if (hasDocumentedAbsence(t.telemetry?.correlationMarkers)) {
+        stats.noErrorCodesDocumented.push(t.id)
+      } else {
+        stats.noErrorCodesUnreviewed.push(t.id)
+      }
     }
   }
 
@@ -100,8 +130,9 @@ async function main() {
   console.log(
     `KQL — dual-platform: ${totals.dualKql.length}  |  Sentinel-only: ${totals.sentinelOnly.length}  |  Defender-only: ${totals.defenderOnly.length}  |  neither: ${totals.noKql.length}`,
   )
+  const totalNoCodes = totals.noErrorCodesDocumented.length + totals.noErrorCodesUnreviewed.length
   console.log(
-    `Entries with zero relevantErrorCodes: ${totals.noErrorCodes.length}/${totals.total} — this is a raw count, not a gap count: some entries (e.g. a well-executed AiTM sign-in) have no distinguishing code by design and document that inline. Read the entry before assuming it's unworked.`,
+    `Entries with zero relevantErrorCodes: ${totalNoCodes}/${totals.total} — ${totals.noErrorCodesDocumented.length} of those are reviewed with a documented reason (e.g. a well-executed AiTM sign-in has no distinguishing code by design), ${totals.noErrorCodesUnreviewed.length} are genuinely unreviewed. Only the unreviewed count is open work.`,
   )
   console.log('')
   console.log('--- Per domain ---')
@@ -114,11 +145,12 @@ async function main() {
     if (stats.sentinelOnly.length > 0) console.log(`  Sentinel-only: ${stats.sentinelOnly.join(', ')}`)
     if (stats.defenderOnly.length > 0) console.log(`  Defender-only: ${stats.defenderOnly.join(', ')}`)
     if (stats.noKql.length > 0) console.log(`  no KQL at all: ${stats.noKql.join(', ')}`)
-    console.log(
-      `  zero relevantErrorCodes: ${stats.noErrorCodes.length}/${stats.total}${
-        stats.noErrorCodes.length > 0 ? ` — ${stats.noErrorCodes.join(', ')}` : ''
-      }`,
-    )
+    if (stats.noErrorCodesUnreviewed.length > 0) {
+      console.log(`  relevantErrorCodes NOT reviewed yet: ${stats.noErrorCodesUnreviewed.join(', ')}`)
+    }
+    if (stats.noErrorCodesDocumented.length > 0) {
+      console.log(`  relevantErrorCodes deliberately absent (documented): ${stats.noErrorCodesDocumented.join(', ')}`)
+    }
   }
 }
 

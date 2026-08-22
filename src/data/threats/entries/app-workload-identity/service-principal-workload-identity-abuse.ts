@@ -42,6 +42,21 @@ const entry: ThreatEntry = {
       'Static secrets are inherently more leak-prone than certificates, and both are more leak-prone than federated credentials, which require no stored secret at all.',
       "AppId / Service Principal object ID: pivot across AADServicePrincipalSignInLogs (auth), CloudAppEvents/OfficeActivity/AzureActivity (usage), and the app registration's own credential history.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS7000215',
+        type: 'Invalid Client Secret',
+        description: 'The provided client secret is invalid — expired, deleted, or simply wrong.',
+        dfirValue:
+          "Your primary containment-confirmation signal: after rotating/removing a compromised secret, watch for this code from the identity that was previously authenticating successfully. Its appearance confirms the old credential is dead. It's also a leading indicator on its own — a spike of this code against a service principal that normally authenticates cleanly can mean someone is retrying a credential that was already rotated out, i.e. a leaked-but-stale secret still circulating.",
+      },
+      {
+        code: 'AADSTS700027',
+        type: 'Invalid Client Assertion',
+        description: 'Client assertion failed signature validation — the certificate-based equivalent of an invalid secret.',
+        dfirValue: 'Same containment-confirmation role as AADSTS7000215, for certificate-based service principals rather than secret-based ones.',
+      },
+    ],
   },
 
   mitre: [

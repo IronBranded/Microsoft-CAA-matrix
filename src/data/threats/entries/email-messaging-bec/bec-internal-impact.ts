@@ -18,8 +18,8 @@ const entry: ThreatEntry = {
       artifact: "Outbound messages from the compromised mailbox to other internal recipients requesting fund transfers, credential entry, or clicking links — distinguishable from external BEC by recipient domain matching the tenant's own",
     },
     {
-      logSourceId: 'unified-audit-log',
-      source: 'OfficeActivity',
+      logSourceId: 'mail-items-accessed',
+      source: 'MailItemsAccessed',
       artifact: 'MailItemsAccessed on internal correspondence threads immediately before crafting a convincing internal lateral-phish reply — requires E5 or Audit (Premium); not available on E3 (see the Acquisition Guide)',
     },
     {
@@ -42,6 +42,7 @@ const entry: ThreatEntry = {
       "Recipient domain matching the tenant's own domain is the key differentiator from BEC External Impact — same underlying mailbox compromise, different blast pattern.",
       'Internal lateral phishing often targets a specific follow-on objective — spreading further, or a specific fraud like an internal approval or gift card request — the actual ask shapes the urgency of response.',
       'Check whether your mail flow rules/EOP policies apply the same scrutiny to internal-to-internal mail as external — a common gap this technique exploits.',
+      'There is deliberately no relevantErrorCodes entry for this scenario, the same reasoning as BEC External Impact: the message sends successfully from a genuine mailbox. Content and pattern review is the only detection path.',
     ],
   },
 

@@ -49,6 +49,7 @@ const entry: ThreatEntry = {
       "Unlike PIM activation, a standing role assignment has no natural 'end' event — treat the assignment itself, not just its creation, as the ongoing finding until it's explicitly removed.",
       "TargetResources[].modifiedProperties -> Role.DisplayName and the assignee's object ID pinpoint exactly who was granted what.",
       'Compare against your own change-management record: a standing privileged grant with no corresponding approved request is the core anomaly, since the raw event alone looks identical to a legitimate one.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: granting a role is a successful, intended-to-succeed administrative action — nothing about the event itself is an error. AuditLogs plus a change-management comparison is the only detection path.',
     ],
   },
 

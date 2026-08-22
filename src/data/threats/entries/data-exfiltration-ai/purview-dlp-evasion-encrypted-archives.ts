@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       'The defining characteristic of this technique is that it defeats content inspection specifically — metadata-level signals (attachment type, size, recipient, sender behavior) remain visible and are the actual detection surface.',
       "A password-protected archive by itself isn't inherently malicious — the anomaly is in who is sending them, how often, and to whom, compared to that account's normal pattern.",
       'Combine this signal with mailbox access volume beforehand, as in BEC and exfiltration scenarios elsewhere in this matrix, for a stronger composite picture of deliberate collection-then-exfiltration.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: the entire technique is built on DLP content inspection simply not seeing inside the archive, so by design nothing fires — no block, no alert, no error. Metadata-level pattern review is the only detection surface, as the correlation markers above describe.',
     ],
   },
 

@@ -45,6 +45,7 @@ const entry: ThreatEntry = {
       'This is fundamentally an inventory/governance gap rather than a single detectable event — the finding is the state of unmanaged apps existing, more than any specific action.',
       'Dormant apps with live credentials and real permissions are a latent risk — they don\'t need to be actively abused to matter; their mere existence expands what a future attacker could target.',
       'Cross-reference app ownership against current HR/directory status — an app owned by a departed employee with nobody having taken over responsibility is a common, specific finding worth searching for directly.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: the risk here is an unmanaged app quietly existing, not any single action that fails or succeeds in a loggable way. Sign-in absence over time, not an error code, is the actual signal.',
     ],
   },
 

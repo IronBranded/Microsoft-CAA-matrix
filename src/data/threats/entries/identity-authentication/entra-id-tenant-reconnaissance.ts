@@ -46,6 +46,16 @@ const entry: ThreatEntry = {
       'Distinct endpoint diversity combined with high request volume in a short window is more indicative of automated enumeration than a human admin browsing the portal.',
       'This is frequently a precursor to a more targeted attack elsewhere in this matrix — treat confirmed reconnaissance as a signal to increase monitoring sensitivity tenant-wide for a period, not just to investigate the recon itself.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'TooManyRequests',
+        type: 'Microsoft Graph Throttling (HTTP 429)',
+        description:
+          'Microsoft Graph throttles by user + resource combination, not total request count. A burst of low-privilege enumeration calls against many different users/groups/apps in a short window is exactly the pattern that trips this, even though each individual call looks unremarkable.',
+        dfirValue:
+          "A 429 in isolation is routine noise — legitimate apps get throttled constantly. What matters is 429s clustered around a single identity making broad, generic reads (users, groups, directoryRoles, applications) rather than the narrow, repetitive call pattern of a normal app. Not every Graph resource returns a Retry-After header, so its absence doesn't mean absence of throttling — check the response code itself, not just the header.",
+      },
+    ],
   },
 
   mitre: [

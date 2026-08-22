@@ -44,6 +44,7 @@ const entry: ThreatEntry = {
       'Role-assignable groups are a smaller, specifically-flagged population — enumerate this list directly rather than trying to infer it from membership-change volume alone.',
       'Group ownership and group membership are separate permissions — a compromised owner account can add members without ever itself holding the role the group grants.',
       "The new member's activity after being added is the practical confirmation that the inherited privilege was actually used, not just granted.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: adding a member to a group the attacker already owns is a normal, successful group-management action — no denial or failure event exists to look for. The role-assignable flag on the group is what makes an otherwise mundane membership change worth flagging.',
     ],
   },
 

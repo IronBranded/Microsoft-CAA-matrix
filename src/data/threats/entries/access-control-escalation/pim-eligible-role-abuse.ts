@@ -47,6 +47,7 @@ const entry: ThreatEntry = {
       "TargetResources[].modifiedProperties -> Role.DisplayName: the activated role name.",
       'Actor UPN vs activation requestor: for legitimate PIM these match; a mismatch, or an activation initiated via Graph API/PowerShell instead of the portal, is a strong anomaly signal.',
       'Activation duration: PIM activations are time-bound (commonly 1–8 hours) — an attacker will often request the maximum allowed window.',
+      "There is deliberately no relevantErrorCodes entry for this scenario: a successful activation is, by definition, PIM correctly doing what it was configured to do for an account that already held the eligible assignment — there's no failure code to point at. Where activation policy requires MFA or approval and the attacker can't satisfy it, that shows up as an activation request that never completes in AuditLogs, not as a numbered error.",
     ],
   },
 

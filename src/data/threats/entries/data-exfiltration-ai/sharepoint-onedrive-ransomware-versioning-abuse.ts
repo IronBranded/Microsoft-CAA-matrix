@@ -44,6 +44,16 @@ const entry: ThreatEntry = {
       'CorrelationId / client App ID performing the mass modification: the same identity/app pivot used in Graph API Bulk Exfiltration applies directly here, since this is the same access pattern used destructively instead of for reading.',
       'Files with version history still intact — where the limit reduction never reached every library, or happened after some files were already touched — are recoverable; prioritize scoping which libraries were and were not affected by the limit change specifically.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'TooManyRequests',
+        type: 'Microsoft Graph / SharePoint Throttling (HTTP 429)',
+        description:
+          'Mass download-encrypt-reupload across a document library at attack speed is the same sustained, mechanically regular request shape that trips throttling for Graph API Bulk Exfiltration elsewhere in this matrix — here directed at write operations instead of reads.',
+        dfirValue:
+          "A burst of 429s against SharePoint/OneDrive file operations for an identity or app with no history of that volume is a strong, low-effort corroborating signal alongside the version-limit-reduction and mass-modification evidence already covered above — worth checking even before those slower-to-confirm signals are fully scoped.",
+      },
+    ],
   },
 
   mitre: [

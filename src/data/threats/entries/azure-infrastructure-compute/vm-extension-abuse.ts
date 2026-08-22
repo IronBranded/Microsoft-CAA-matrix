@@ -45,6 +45,24 @@ const entry: ThreatEntry = {
       'CustomScriptExtension specifically is the most common vector since it accepts an arbitrary script URL or inline command — treat its use with proportionally more scrutiny than other extension types.',
       'Unlike Run Command, an extension persists on the VM as a resource and can be configured to re-run — check for extensions still present on affected VMs after initial remediation, not just the deployment event.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'VMExtensionProvisioningError',
+        type: 'ARM Deployment Failure',
+        description:
+          'The extension resource itself failed to provision at the ARM/agent level — distinct from the script inside it failing after it did provision successfully.',
+        dfirValue:
+          'A failed extension deployment in AzureActivity still confirms an attempt and identifies the caller, even when the payload never actually ran on the VM. Do not filter detection to successful deployments only — a burst of these from one identity is itself worth investigating.',
+      },
+      {
+        code: 'VMExtensionHandlerNonTransientError',
+        type: 'Extension Handler Failure',
+        description:
+          "The extension provisioned onto the VM but its handler (e.g. the CustomScriptExtension process) failed during execution — check the guest OS's own extension logs (Microsoft.Compute.CustomScriptExtension handler.log, or the Windows equivalent under C:\\WindowsAzure\\Logs\\Plugins) for what the script actually attempted.",
+        dfirValue:
+          "This is the more concerning of the two failure modes forensically, not the less: the payload reached and executed on the VM, it just didn't complete cleanly. Treat it the same as a successful deployment for triage purposes — a failed script can still have run destructive or persistence-establishing commands before hitting whatever caused the non-zero exit.",
+      },
+    ],
   },
 
   mitre: [

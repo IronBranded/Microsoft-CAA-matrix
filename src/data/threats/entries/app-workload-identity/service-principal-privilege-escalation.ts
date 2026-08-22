@@ -43,6 +43,7 @@ const entry: ThreatEntry = {
       'AppRoleAssignment.ReadWrite.All is the single most dangerous Graph application permission to see granted — holding it lets a service principal grant itself, or any other app, any other application permission in the tenant.',
       'Self-granting: check whether the service principal performing the grant is the SAME service principal receiving the new permission — that specific pattern has very few legitimate explanations.',
       'AppId / Service Principal object ID: pivot across AuditLogs (the grant), CloudAppEvents/OfficeActivity (subsequent use), and SigninLogs (the app\'s own authentication activity).',
+      'There is deliberately no relevantErrorCodes entry for this scenario: a service principal with AppRoleAssignment.ReadWrite.All granting itself another permission is a fully successful, intended-to-work Graph API call — nothing about it fails. The self-grant pattern in AuditLogs is the only signal.',
     ],
   },
 

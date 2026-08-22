@@ -11,6 +11,7 @@ import NotFoundView from '@/components/views/NotFoundView/NotFoundView'
 // first-loaded view — never needs.
 const ThreatDetailView = lazy(() => import('@/components/views/ThreatDetailView/ThreatDetailView'))
 const AcquisitionView = lazy(() => import('@/components/views/AcquisitionView/AcquisitionView'))
+const IdentityPillarsView = lazy(() => import('@/components/views/IdentityPillarsView/IdentityPillarsView'))
 
 export default function App() {
   const { segments } = useRoute()
@@ -34,6 +35,13 @@ export default function App() {
       return (
         <Suspense fallback={null}>
           <AcquisitionView />
+        </Suspense>
+      )
+    }
+    if (segments[0] === 'identity-pillars') {
+      return (
+        <Suspense fallback={null}>
+          <IdentityPillarsView />
         </Suspense>
       )
     }

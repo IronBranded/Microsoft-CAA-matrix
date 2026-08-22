@@ -48,6 +48,22 @@ const entry: ThreatEntry = {
       'Time from creation to first use: a legitimate app typically has some gap for testing; an attacker-created app is often used almost immediately.',
       'AppId is the durable pivot across every subsequent event this app generates — capture it early in the investigation.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS65001',
+        type: 'Consent Required',
+        description: "DelegationDoesNotExist — the user or administrator hasn't consented to use the application. A newly-registered malicious app needs exactly this consent to actually activate.",
+        dfirValue:
+          "A cluster of AADSTS65001 for a brand-new AppId, followed by a successful sign-in, brackets the exact moment the app went from registered-but-inert to actually granted access — often the more important timestamp than the registration event itself for scoping what the app could subsequently touch.",
+      },
+      {
+        code: 'AADSTS90094',
+        type: 'Admin Consent Required',
+        description: 'AdminConsentRequired — the app requested permissions high-privilege enough that admin consent, not user consent, is required.',
+        dfirValue:
+          "If this fires instead of a clean consent, the attacker's app requested permissions the tenant's consent policy classified as needing admin approval — meaningful scoping information even if the attempt was blocked, since it reveals intended scope regardless of outcome.",
+      },
+    ],
   },
 
   mitre: [{ id: 'T1136.003', name: 'Create Account: Cloud Account', tactic: 'Persistence' }],

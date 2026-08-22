@@ -53,6 +53,7 @@ const entry: ThreatEntry = {
       'A newly-created external tenant with no prior collaboration history messaging your users out of the blue is a strong signal, distinguishable from a genuine, established partner relationship.',
       "This technique's effectiveness comes largely from user unfamiliarity with the threat model on this specific platform — training coverage gaps here are as much a root cause as any technical control gap.",
       "Fraudulent, purpose-created tenants used specifically to initiate Teams meeting chats with target users — and, increasingly, to place direct voice calls — is a documented pattern distinct from a compromised-account variant of this same technique. Both end up in the artifacts above, but the fraudulent-tenant variant is worth distinguishing during triage since it implies no internal account is actually compromised yet.",
+      'There is deliberately no relevantErrorCodes entry for this scenario: external Teams federation working as configured is not a failure — it is federation doing exactly what it was turned on to do. Sender/tenant reputation and pattern review are the only detection path.',
     ],
   },
 

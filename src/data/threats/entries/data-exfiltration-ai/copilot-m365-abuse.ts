@@ -42,6 +42,7 @@ const entry: ThreatEntry = {
       "Copilot doesn't grant new access — every scenario here depends on the querying identity already having legitimate permission to the underlying content. The abuse is in efficiency of discovery, not in access itself, which changes what a defensible response looks like.",
       'As with prompt injection, audit coverage specific to Copilot interactions is still maturing — treat gaps in this area as a known, current limitation rather than a sign nothing happened.',
       'A compromised account using Copilot to rapidly aggregate sensitive information it already had scattered access to is functionally similar in outcome to Graph API Bulk Exfiltration elsewhere in this matrix, just via a different, higher-level interface.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: every query Copilot answers using access the identity already legitimately holds is, by definition, a successful and authorized operation. Volume/pattern review is the only detection path, same as the Graph API bulk-exfiltration entry it mirrors in outcome.',
     ],
   },
 

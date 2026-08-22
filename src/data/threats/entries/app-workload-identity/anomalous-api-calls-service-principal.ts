@@ -43,6 +43,15 @@ const entry: ThreatEntry = {
       'This entry is the general detection pattern; Service Principal / Workload Identity Abuse elsewhere in this matrix covers the credential-theft root cause most commonly behind it — investigate both together.',
       'A service principal suddenly calling endpoints or resource types it has never touched, even within its technically-granted permission scope, is worth investigating even without a specific credential-leak indicator.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'TooManyRequests',
+        type: 'Microsoft Graph Throttling (HTTP 429)',
+        description: "Throttling is scoped to user/app + resource, not total volume — a service principal driven by an attacker into unfamiliar endpoints at unfamiliar volume is a strong candidate to trip this, precisely because its normal automation doesn't.",
+        dfirValue:
+          "Because service principals should have the most predictable behavior of any identity type in a tenant (per the correlation markers above), a service principal that suddenly starts getting throttled when it normally never does is a meaningfully stronger signal here than the same pattern would be for a human user's traffic.",
+      },
+    ],
   },
 
   mitre: [{ id: 'T1078.004', name: 'Valid Accounts: Cloud Accounts', tactic: 'Defense Evasion' }],

@@ -44,6 +44,21 @@ const entry: ThreatEntry = {
       "Multiple valid credentials can coexist — the original legitimate one keeps working, so the app owner may not notice anything is wrong until the attacker's credential is actually used maliciously.",
       'Compare the credential\'s added-by identity against who normally manages that specific application — Application Administrators and app owners are a much smaller population than the full admin population.',
     ],
+    relevantErrorCodes: [
+      {
+        code: 'AADSTS7000215',
+        type: 'Invalid Client Secret',
+        description: 'The provided client secret is invalid. Multiple valid secrets can coexist on one app, so this fires per-credential, not per-app — the original legitimate secret keeps working even while an attacker-added one is separately valid.',
+        dfirValue:
+          "Once you identify and remove the attacker-added credential specifically (not the original one), this code confirms removal took effect for anything still trying to use it. Because the app has multiple valid credentials simultaneously, don't assume the app is clean just because a credential still authenticates successfully — verify it's the legitimate one.",
+      },
+      {
+        code: 'AADSTS700027',
+        type: 'Invalid Client Assertion',
+        description: 'Certificate-based equivalent of an invalid secret, relevant if the added credential was a certificate rather than a client secret.',
+        dfirValue: 'Same removal-confirmation role as AADSTS7000215, for certificate-based credential additions.',
+      },
+    ],
   },
 
   mitre: [{ id: 'T1098.001', name: 'Account Manipulation: Additional Cloud Credentials', tactic: 'Persistence' }],

@@ -43,6 +43,7 @@ const entry: ThreatEntry = {
       "Diagnostic settings changes are scoped per-resource — an attacker doesn't need to find and disable one central switch, they can quietly narrow logging on just the specific resource(s) relevant to whatever they're about to do next, which is both more targeted and easier to miss than a tenant-wide toggle.",
       "Removing a diagnostic setting doesn't delete already-ingested data, only stops future ingestion — the gap starts exactly at the change and continues until someone notices and fixes it.",
       'Cross-reference the timing of any diagnostic settings change against other suspicious activity on the SAME resource — this technique is rarely the end goal, it\'s cover for something else happening on that resource right after.',
+      'There is deliberately no relevantErrorCodes entry for this scenario: removing or narrowing a diagnostic setting with sufficient rights succeeds cleanly. The change event itself, and the ingestion gap it opens, are the only signal.',
     ],
   },
 

@@ -43,6 +43,16 @@ const entry: ThreatEntry = {
       'This spans two related but distinct platforms — Azure Logic Apps (ARM-managed, AzureActivity-visible) and Power Automate (M365-managed, OfficeActivity-visible) — check both, since an attacker with access to either could use it similarly.',
       "Network-layer visibility can corroborate or even precede audit-log-based detection, especially if the flow's own configuration audit trail is incomplete.",
     ],
+    relevantErrorCodes: [
+      {
+        code: 'Suspended',
+        type: 'DLP Policy Violation (Flow Status) — Power Automate only',
+        description:
+          "Not an AADSTS/ARM code — a flow status, and specific to the Power Automate half of this entry. Power Automate marks a flow Suspended when it mixes connectors from DLP-restricted data groups; it still saves, and only stops executing at that point. Azure Logic Apps has no equivalent tenant-wide DLP concept — this code does not apply to that half.",
+        dfirValue:
+          "For the Power Automate half: a recurrence-triggered flow that goes Suspended right after someone tightens DLP policy is a strong signal the policy change was a direct response to it. For the Logic Apps half, this control gap is itself worth noting to whoever owns egress governance — outbound HTTP actions from Logic Apps rely entirely on network-layer controls (NSG/firewall egress rules) since there's no DLP-equivalent connector categorization to fall back on.",
+      },
+    ],
   },
 
   mitre: [{ id: 'T1567', name: 'Exfiltration Over Web Service', tactic: 'Exfiltration' }],

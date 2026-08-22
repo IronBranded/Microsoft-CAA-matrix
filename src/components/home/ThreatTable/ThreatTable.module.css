@@ -149,3 +149,9 @@
 .sevDot[data-severity='low'] {
   background: var(--sev-low);
 }
+
+@media (max-width: 640px) {
+  .categoryCol {
+    display: none;
+  }
+}

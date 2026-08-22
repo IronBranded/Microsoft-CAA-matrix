@@ -13,18 +13,21 @@ const entry: ThreatEntry = {
     "An attacker initiates a device code authentication flow, generating a code. They send this code via a phishing lure instructing the target to visit microsoft.com/devicelogin. Once the user authenticates (including MFA), the Entra ID token is delivered directly to the attacker's polling session. In its basic form this hands the attacker a plain access or refresh token — but a more severe, actively-exploited variant exists: by requesting the token using the Microsoft Authentication Broker's own client ID (29d9ed98-a469-4536-ade2-f981bc1d605e) against the Device Registration Service, the attacker can register a rogue device in Entra ID that appears fully legitimate, then request a Primary Refresh Token (PRT) from it — bypassing device-based Conditional Access entirely, not just MFA.",
 
   forensicArtifacts: [
-    { source: 'Entra ID SigninLogs', artifact: "AuthenticationProtocol == 'deviceCode'" },
+    { logSourceId: 'sign-in-logs', source: 'Entra ID SigninLogs', artifact: "AuthenticationProtocol == 'deviceCode'" },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         "originalTransferMethod == 'deviceCodeFlow' — a separate field from AuthenticationProtocol, not part of the JWT itself, that corroborates the same finding. Check both; relying on only one leaves a detection gap if that specific field is ever renamed or restructured.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         "AppId == '29d9ed98-a469-4536-ade2-f981bc1d605e' (Microsoft Authentication Broker) combined with AuthenticationProtocol == 'deviceCode' is a high-fidelity indicator on its own — this specific client ID is what lets a stolen token be upgraded to register a rogue device and mint a PRT. Legitimate use exists (genuine Windows Hello for Business enrollment, shared/kiosk device onboarding), so treat as a strong prioritization signal rather than an automatic block.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         "ClientAppUsed == 'Microsoft Azure CLI' or 'Microsoft Azure PowerShell' (often default for attack tools like TokenTactics)",
@@ -34,10 +37,12 @@ const entry: ThreatEntry = {
       artifact: 'High-volume Graph API or Exchange Online API calls immediately following the device code sign-in',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID NonInteractiveUserSignInLogs',
       artifact: "Subsequent token refreshes originating from the attacker's IP address (often VPS or VPN providers)",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "A new device registration event immediately following a device-code sign-in that used the Broker AppId — this is the moment the attacker's rogue device becomes a 'legitimate' object in your tenant, and the highest-value single event to alert on in this entire chain.",

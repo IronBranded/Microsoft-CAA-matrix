@@ -14,6 +14,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         'Token-broker-issued sign-ins from an IP/device inconsistent with the device the PRT actually claims to be bound to — a PRT extracted and replayed from a different machine than the one it was issued on',
@@ -29,10 +30,12 @@ const entry: ThreatEntry = {
         "The device object the PRT claims to be bound to — check `dsregcmd /status` on the purported device, or its TPM attestation state, for consistency with how and where the token is actually being used. Where TPM-bound key storage is properly enforced, the session key itself can't be extracted even with LSASS access — a successful extraction despite this control being nominally enabled is itself worth investigating as a possible TPM/attestation bypass or misconfiguration, not just the token theft.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID NonInteractiveUserSignInLogs',
       artifact: "A burst of token refresh activity from a device object with no recent normal interactive activity, or from an IP geographically inconsistent with that device's usual pattern",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Device object anomalies — TPM-bound status or compliance state changing unexpectedly around the time of suspected abuse",
     },

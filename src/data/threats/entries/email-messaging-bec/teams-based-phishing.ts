@@ -17,10 +17,12 @@ const entry: ThreatEntry = {
       artifact: 'External Teams federation configuration — whether restricted to specific known partner domains or open broadly, which shapes how easily an attacker-controlled tenant can initiate contact',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'Microsoft Teams message logs (via OfficeActivity)',
       artifact: 'Messages received from external tenants with no prior collaboration history and a display name impersonating a known contact or brand',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "The external tenant's domain age/reputation where determinable — attacker-created tenants for this purpose are often very recently established",
     },
@@ -29,6 +31,7 @@ const entry: ThreatEntry = {
       artifact: "Users reporting suspicious Teams messages — this technique often succeeds specifically because users don't expect phishing on this platform",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: 'Link-click or file-download activity following receipt of an external Teams message, if the lure included a malicious link/attachment',
     },

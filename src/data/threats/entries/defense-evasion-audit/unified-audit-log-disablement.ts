@@ -14,23 +14,28 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'AuditLogs (admin pipeline, separate from the UAL itself)',
       artifact: "OperationName == 'Set-AdminAuditLogConfig' with UnifiedAuditLogIngestionEnabled set to False",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: 'An abrupt, complete cessation of all OfficeActivity events tenant-wide from a specific timestamp onward — the absence of data is itself the artifact',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'Exchange Online PowerShell — Get-AdminAuditLogConfig',
       artifact: 'Get-AdminAuditLogConfig | Format-List UnifiedAuditLogIngestionEnabled showing False when queried live, if the attacker has not yet re-enabled it to cover their tracks — must be run in Exchange Online PowerShell specifically, not Security & Compliance PowerShell, where this property always reads False regardless of actual state',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'Exchange Online PowerShell — Search-UnifiedAuditLog',
       artifact:
         'Search-UnifiedAuditLog -Operations Set-AdminAuditLogConfig finds this specific event directly, per Microsoft\'s own documented method, and returns who made the change and the source IP — the historical counterpart to the live-status check above',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'The admin session (interactive, PowerShell, or Graph) that issued the disablement command — identify account, IP, and whether privileged-role MFA was enforced',
     },

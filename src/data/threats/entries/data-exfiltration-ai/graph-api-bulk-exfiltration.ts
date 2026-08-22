@@ -14,23 +14,28 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'graph-activity-logs',
       source: 'Microsoft Graph Activity Logs',
       artifact:
         "High request-rate patterns against /me/messages, /me/drive/root/children, /users/{id}/messages, or similar bulk-list endpoints from a single client/token in a short window (requires enabling via Entra diagnostic settings). Repeated pagination through the same result set (sequential @odata.nextLink follows) or a delta query (/delta endpoints) pulling a full initial sync rather than incremental changes are both specific, checkable signatures of programmatic bulk retrieval rather than a human browsing.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'AADNonInteractiveUserSignInLogs',
       artifact: 'Token refresh volume far exceeding normal client behavior — bulk exfil scripts typically hold a session open and refresh repeatedly rather than the natural start/stop pattern of interactive use',
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'CloudAppEvents (Defender for Cloud Apps)',
       artifact: "'Mass download' or 'unusual file access' anomaly detections, particularly volume-based policies on file/message access counts per session",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: 'MailItemsAccessed at anomalously high volume for a short window, consistent with programmatic enumeration rather than a human reading mail',
     },
     {
+      logSourceId: 'graph-activity-logs',
       source: 'Microsoft Graph Activity Logs',
       artifact: 'The full HTTP request trail against Microsoft Graph itself, including endpoints and volume — this is a diagnostic log category that must be explicitly enabled via Entra ID diagnostic settings; it is not on by default and is easy to assume exists when it does not',
     },

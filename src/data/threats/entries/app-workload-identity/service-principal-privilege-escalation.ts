@@ -14,10 +14,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Add app role assignment to service principal' granting a high-privilege Graph application permission (AppRoleAssignment.ReadWrite.All, RoleManagement.ReadWrite.Directory, or similar) to an app",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'TargetResources showing which app role/permission was granted and to which service principal — AppRoleAssignment.ReadWrite.All specifically is notable since it lets its holder grant further app roles, including to itself',
     },
@@ -30,6 +32,7 @@ const entry: ThreatEntry = {
       artifact: 'API activity from the newly-escalated service principal immediately following the grant, using its new permission scope',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Any subsequent directory role assignment to the same service principal — application permissions and directory roles are separate privilege paths, and a sophisticated escalation chain often uses one to obtain the other',
     },

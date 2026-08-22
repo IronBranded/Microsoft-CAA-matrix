@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Add device' — new device object registration, worth reviewing against expected enrollment sources rather than direct join from an unexpected context",
     },
@@ -21,6 +22,7 @@ const entry: ThreatEntry = {
       artifact: "Device compliance state — a device registered but never actually managed, yet still satisfying a 'require compliant device' check, points to either a Conditional Access gap or a spoofed compliance signal",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'The registering user/session — device registration is typically self-service, so this technique is usually a second step after some other compromise',
     },
@@ -30,6 +32,7 @@ const entry: ThreatEntry = {
         "The tenant's configured 'Maximum number of devices per user' setting (default is a moderate cap, but tenants sometimes raise or unlimit it for legitimate reasons) — a user suddenly approaching or exceeding what would normally be a reasonable personal device count is a quota-based signal independent of any single registration event looking suspicious on its own.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'Subsequent sign-ins where the Conditional Access decision references the newly-registered device — confirms the device is actively being used to satisfy device-trust policy',
     },

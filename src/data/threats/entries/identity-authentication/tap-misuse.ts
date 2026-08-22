@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'A Temporary Access Pass issuance event, showing who issued it and to which target account',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'A new MFA method (Authenticator app, phone number, FIDO2 key) registered using the TAP shortly after issuance — the actual persistence-establishing step',
     },
@@ -25,11 +27,13 @@ const entry: ThreatEntry = {
       artifact: 'The support interaction that led to TAP issuance — verify it corresponds to a real, verified user request rather than a social-engineered one',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "The TAP's configured lifetime and one-time-use setting — a long-lived, reusable TAP is a much larger exposure window than a short, one-time one. Also worth checking: whether the account already had another MFA method registered before the TAP was issued — TAP is meant for bootstrap/recovery scenarios, so a TAP issued to an account that wasn't actually locked out is itself an anomaly worth the same scrutiny as the registration event it enabled.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The TAP-based sign-in and the immediately following registration session's IP/device, compared against the legitimate account owner's normal pattern",
     },

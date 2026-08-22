@@ -14,10 +14,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Add member to role' with no PIM-activation qualifier — a direct, permanent role assignment rather than a time-bound PIM activation",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "TargetResources showing the role name and the assigning admin's identity — unlike PIM activation, there's no subsequent expiration event to corroborate; the assignment persists until someone removes it",
     },
@@ -27,6 +29,7 @@ const entry: ThreatEntry = {
         "Whether the privileged role is actually in scope for a recurring access review, and if so, the review's own history — a standing assignment that has never been reviewed, or was auto-approved by inactivity/default-decision settings rather than an explicit reviewer action, is a governance gap independent of whether the current incident involves a genuine compromise.",
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Microsoft.Authorization/roleAssignments/write for a standing (non-eligible) Owner/Contributor/User Access Administrator assignment at subscription or management-group scope',
     },
@@ -35,6 +38,7 @@ const entry: ThreatEntry = {
       artifact: "The current, standing set of directory role and Azure RBAC assignments — since there's no activation event to alert on, detection here leans heavily on regularly querying who currently holds privileged access, not just watching for a moment-in-time trigger",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The assigning admin's sign-in immediately preceding the assignment — establishes whether it came from their normal pattern or a compromised session",
     },

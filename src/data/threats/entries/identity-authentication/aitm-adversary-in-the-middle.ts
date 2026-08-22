@@ -14,20 +14,24 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         'A successful sign-in for a session/token later reused from a materially different IP address or device — the replay of a stolen cookie from attacker infrastructure, separate from the sign-in the victim actually completed',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The originating IP on the initial sign-in resolving to known reverse-proxy/phishing infrastructure ranges rather than the victim's typical residential or corporate range",
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'Microsoft Defender for Cloud Apps',
       artifact:
         "The named Defender alert 'Suspicious activity likely indicative of a connection to an adversary-in-the-middle (AiTM) phishing site' — a specific, documented alert title rather than a generic anomaly score, worth alerting on directly rather than only hunting for it manually.",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — mail flow / message headers',
       artifact:
         "Phishing lures delivered via legitimate bulk-email infrastructure (SendGrid and similar services) disguised as payment or receipt notifications — a documented delivery pattern for EvilProxy-based AiTM activity generally. A spike in mail from these services to a small set of users shortly before an anomalous-token detection is a meaningful correlation, not a coincidence.",
@@ -38,6 +42,7 @@ const entry: ThreatEntry = {
         "A SharePoint file-share notification immediately preceding an AiTM sign-in — SharePoint sharing notifications are a documented initial lure delivery mechanism for multi-stage attacks that pivot from AiTM into BEC via inbox rules. If present, this pattern also produces two other named signals worth checking directly: 'Unfamiliar Signin Correlation with AzurePortal Signin Attempts and AuditLogs' and 'Multiple users email forwarded to same destination'.",
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection',
       artifact: "'Anomalous token' and 'token issuer anomaly' risk detections, which Identity Protection maintains specifically for this scenario",
     },

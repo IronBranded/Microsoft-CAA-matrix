@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'A session or token reused from an IP or device inconsistent with the original issuance — the core signature of any stolen-and-replayed credential',
     },
@@ -21,14 +22,17 @@ const entry: ThreatEntry = {
       artifact: 'Malware or a malicious browser extension with access to cookie storage (ESTSAUTH/ESTSAUTHPERSISTENT) or local token caches',
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceProcessEvents / DeviceFileEvents',
       artifact: "A process reading browser profile directories or known token cache locations outside of the browser's own normal operation — the signature of commodity infostealer malware",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID NonInteractiveUserSignInLogs',
       artifact: 'Token refresh activity continuing from a device/IP with no corresponding interactive sign-in — reuse without the original authentication event',
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection',
       artifact: "'Anomalous token' risk detection — the same purpose-built signal used for AiTM, since the underlying pattern is shared regardless of how the credential was obtained",
     },

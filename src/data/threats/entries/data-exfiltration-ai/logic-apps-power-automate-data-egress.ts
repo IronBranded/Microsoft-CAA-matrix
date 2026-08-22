@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Logic App creation/modification defining an HTTP action posting to an external, unfamiliar endpoint — the Azure-resource-side equivalent of a malicious Power Automate flow (requires a Diagnostic Setting routing the Activity Log to your workspace)',
     },
@@ -22,6 +23,7 @@ const entry: ThreatEntry = {
         "Actual execution history and the volume/frequency of data sent to the external endpoint — confirms ongoing operation, not just configuration. Run history in the portal has a default retention window (commonly 90 days) after which older runs age out; for anything beyond that window, the Logic App's own Diagnostic Settings (WorkflowRuntime logs, a separate diagnostic category from the AzureActivity control-plane log above) need to already have been routed to a workspace, or that history is simply gone.",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity (Power Automate) — the Unified Audit Log (UAL)',
       artifact: 'Flow definitions with a recurrence trigger combined with an HTTP action — the continuous-streaming pattern that distinguishes this from a one-time export',
     },

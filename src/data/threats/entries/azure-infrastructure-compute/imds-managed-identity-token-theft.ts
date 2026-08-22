@@ -14,20 +14,24 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact:
         "ARM API calls authenticated via the VM's Managed Identity object ID, from IPs outside the expected Azure datacenter range, or against resources unrelated to the VM's normal function — the Activity Log itself is always generated at the platform level, but reaching this table in a Sentinel workspace requires a Diagnostic Setting explicitly routing it there; confirm that routing exists before treating an empty query result as a clean finding",
     },
     {
+      logSourceId: 'managed-identity-signin-logs',
       source: 'AADManagedIdentitySignInLogs',
       artifact: "Sign-in events for the managed identity's Service Principal ID correlating in time with suspicious VM process activity",
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceProcessEvents (VM guest OS)',
       artifact:
         "Outbound HTTP requests to 169.254.169.254 from unexpected processes (curl, PowerShell Invoke-RestMethod, python, or a web app worker process) carrying the 'Metadata: true' header",
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceNetworkEvents (VM guest OS)',
       artifact:
         'Connections to 169.254.169.254:80 from a process context tied to a web application rather than the expected system agents (WindowsAzureGuestAgent, WALinuxAgent)',

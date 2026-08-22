@@ -17,6 +17,7 @@ const entry: ThreatEntry = {
       artifact: 'An unfamiliar or unexpectedly-registered connector — similar in principle to a rogue PTA agent, a new connector extends whoever controls it a path into the internal network',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Connector registration events and the identity that performed them — requires sufficient Application Administrator-equivalent privilege',
     },

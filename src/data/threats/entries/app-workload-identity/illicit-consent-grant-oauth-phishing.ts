@@ -14,10 +14,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Consent to application' performed by the affected user themselves against an unfamiliar or newly-registered application",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "TargetResources showing the exact delegated scopes granted — especially 'offline_access', which is what makes the grant durable via refresh tokens",
     },
@@ -30,6 +32,7 @@ const entry: ThreatEntry = {
       artifact: "Graph API or Exchange Online activity performed by the application's Service Principal immediately following the consent grant",
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'Microsoft Defender for Cloud Apps',
       artifact: "OAuth app anomaly alerts such as 'Suspicious OAuth app file download activity' or 'Misleading OAuth app name', if licensed",
     },
@@ -39,6 +42,7 @@ const entry: ThreatEntry = {
         "App display name and logo impersonating a specific, real business tool (a CRM data-loader utility, a common productivity integration) rather than a generic or obviously-fake name — disguising a malicious app as a plausible, expected admin/integration tool is the current dominant pattern, not the more easily-spotted generic-name registrations of a few years ago.",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs — absence as the signal',
       artifact:
         "A technique known as 'ConsentFix' specifically avoids the app registration and consent-prompt steps this entry's other artifacts depend on: it abuses a pre-trusted first-party application's OAuth authorization code flow directly, inheriting the victim's delegated permissions without any new app or 'Consent to application' event ever appearing. If the standard consent-grant artifacts above are absent but SigninLogs/OfficeActivity still show unexplained delegated-scope API activity, this is why — check the client AppId against Microsoft's own first-party app list rather than assuming a clean audit trail means nothing happened.",

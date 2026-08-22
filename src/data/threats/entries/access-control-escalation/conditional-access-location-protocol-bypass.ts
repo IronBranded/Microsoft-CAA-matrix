@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "A successful sign-in from an IP within a trusted/named location range, for an account whose normal behavior doesn't otherwise match that location",
     },
@@ -21,10 +22,12 @@ const entry: ThreatEntry = {
       artifact: "The actual configured IP ranges for each trusted location — verify they're still accurate and not broader than intended, such as an entire cloud provider's block instead of one office's static IP",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'IPv6 sign-ins where the corresponding policy or named location was only ever configured with IPv4 ranges — a protocol-family gap rather than an IP-range gap',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Changes to named location definitions themselves — an expanded IP range or a location marked trusted that shouldn't be",
     },

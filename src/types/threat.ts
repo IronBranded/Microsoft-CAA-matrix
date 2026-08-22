@@ -101,6 +101,13 @@ export const ORDERED_DOMAINS: DomainSlug[] = [...DOMAINS].sort(
 export const ForensicArtifactSchema = z.object({
   source: z.string().min(1),
   artifact: z.string().min(1),
+  /**
+   * Optional cross-reference to a LogSource.id in the Acquisition Guide —
+   * lets ForensicArtifactsTable render a "how do I actually get this"
+   * deep-link next to the artifact instead of leaving licensing/collection
+   * questions implicit.
+   */
+  logSourceId: z.string().optional(),
 })
 export type ForensicArtifact = z.infer<typeof ForensicArtifactSchema>
 

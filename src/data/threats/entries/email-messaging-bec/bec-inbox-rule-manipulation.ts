@@ -13,18 +13,22 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: "Operation == 'New-InboxRule' or 'Set-InboxRule' with DeleteMessage, MoveToFolder targeting an obscure folder, or MarkAsRead actions, scoped to specific senders or subject keywords rather than broad criteria",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: "Rule conditions targeting keywords like 'invoice', 'payment', 'wire', 'confirm', or a specific bank/vendor domain — the rule's targeting criteria often reveal the fraud's actual subject matter",
     },
     {
+      logSourceId: 'message-trace-log',
       source: 'Message Trace',
       artifact: 'Messages matching the rule criteria that were actually moved/deleted/marked-read, confirming the rule had real effect rather than sitting unused',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'The session that created the rule, for IP/device consistency check',
     },
@@ -33,11 +37,13 @@ const entry: ThreatEntry = {
       artifact: 'Messages sitting in the target folder or in Deleted Items that the legitimate user never saw — the direct evidence of what the rule successfully hid',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact:
         "Rules specifically targeting HR/payroll-platform notification senders (Workday and similar HRSaaS domains) rather than banking correspondence — a documented pattern in payroll-fraud-focused BEC: compromise the mailbox, then create a rule deleting the platform's own change-confirmation emails so the victim never sees the salary-redirect notification before the next pay cycle.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID NonInteractiveUserSignInLogs',
       artifact:
         "Recurring non-interactive sign-ins to the OfficeHome application specifically, from an automation-style UserAgent (Axios and similar HTTP client libraries are commonly seen), at a suspiciously regular interval — this is how an attacker keeps a stolen session alive between actions rather than relying on one-time token use. A regular, machine-precise interval (as opposed to the irregular pattern of genuine human activity) is the actual signal, whatever the specific period turns out to be. Sessions maintained this way typically go inactive within weeks of compromise once refresh tokens expire or are rotated, which bounds how far back a durable-persistence investigation usually needs to look.",

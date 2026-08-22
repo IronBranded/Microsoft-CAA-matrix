@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity / Exchange mail flow — the Unified Audit Log (UAL)',
       artifact: "Outbound email with password-protected .zip, .7z, or encrypted .pdf attachments — DLP content inspection can't see inside these, so the attachment type and encryption state itself is the detectable signal",
     },
@@ -22,14 +23,17 @@ const entry: ThreatEntry = {
         "Whether a policy exists at all for flagging/blocking password-protected archive attachments outbound — many tenants have no specific control for this pattern. The same evasion works identically via a SharePoint/OneDrive external share link to an encrypted archive rather than an email attachment — DLP content inspection has the same blind spot there, so check sharing activity for encrypted archives alongside mail flow, not instead of it.",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: 'A spike in outbound messages with archive-type attachments from an account with no normal business reason to routinely send them',
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'CloudAppEvents',
       artifact: 'A similar pattern for cloud-storage uploads carrying encrypted archives to external recipients',
     },
     {
+      logSourceId: 'message-trace-log',
       source: 'Message Trace',
       artifact: 'The recipient domain(s) for messages carrying encrypted archives — external, unfamiliar domains are more concerning than known business partners',
     },

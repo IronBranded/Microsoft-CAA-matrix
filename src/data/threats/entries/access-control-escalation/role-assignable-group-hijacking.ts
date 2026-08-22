@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Add member to group' where the target group has isAssignableToRole = true — inheriting whatever directory role the group itself holds",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'The acting identity\'s relationship to the group — group owners can typically add members without holding the underlying role themselves, which is the crux of this technique',
     },
@@ -26,10 +28,12 @@ const entry: ThreatEntry = {
         "The specific directory role(s) assigned to the role-assignable group — this defines the actual privilege inherited by any new member. Note that isAssignableToRole can only be set at group creation, not toggled on retroactively — so the group's membership and ownership history predates and is independent of any recent incident; a role-assignable group being targeted is a group that was already sitting there as a target, not one an attacker made role-assignable as part of the attack itself.",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "A change to the group's ownership immediately preceding a suspicious membership change — an attacker may need to gain ownership before adding a member",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The newly-added member's subsequent sign-in activity exercising the inherited privilege",
     },

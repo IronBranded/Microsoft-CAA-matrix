@@ -13,23 +13,28 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'A burst of Graph API calls against /users, /groups, /directoryRoles, or /applications list endpoints from a single session/token in a short window, especially from an account with no prior history of such calls',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID AADNonInteractiveUserSignInLogs',
       artifact: 'High-volume, sustained token usage against Microsoft Graph, consistent with a scripted enumeration tool rather than interactive browsing',
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'CloudAppEvents',
       artifact:
         "Anomalous or unrecognized User-Agent strings making Graph API list/enumerate calls — reconnaissance tools often don't disguise their tooling's default HTTP client signature. Purpose-built enumeration tools (AzureHound, ROADrecon, and similar BloodHound-style Entra/Azure collectors) are common enough in both legitimate red-team use and real attacks that their default User-Agent or request patterns are worth having on a watchlist independent of any specific campaign.",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Absence of a corresponding audit trail — pure read enumeration doesn't generate AuditLogs entries the way write operations do, meaning sign-in/Graph activity volume is often the only visible signal",
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'Microsoft Defender for Cloud Apps',
       artifact: 'Built-in anomaly detections for unusual Graph API query volume or pattern, if configured',
     },

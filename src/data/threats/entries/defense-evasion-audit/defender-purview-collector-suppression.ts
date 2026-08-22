@@ -17,6 +17,7 @@ const entry: ThreatEntry = {
       artifact: "Changes to a security connector's configuration or health status — for Defender for Cloud Apps, app connector authorization changes; for Sentinel-side data connectors, changes to their enabled/connected state",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Revocation or modification of a security tool's own service principal permissions — many integrations run as an app registration with its own Graph/API permissions, which can itself be tampered with",
     },
@@ -36,6 +37,7 @@ const entry: ThreatEntry = {
         'Sensor/agent health status showing an unexpected offline or degraded state for specific hosts or connectors, rather than a broad platform-wide outage — this reactive health check matters as a backstop precisely because a bypass technique tamper protection does not specifically recognize will not raise any of the named alerts above',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Changes to Microsoft Sentinel data connector configuration specifically, since Sentinel itself is a resource whose connectors can be individually disabled',
     },

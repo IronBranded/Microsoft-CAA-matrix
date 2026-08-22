@@ -18,6 +18,7 @@ const entry: ThreatEntry = {
         "Hidden or obscured instruction-like text embedded in a document or email — white-on-white text, tiny font sizes, HTML comments, or metadata fields — designed to be invisible to a human reader but ingested as context by an AI assistant. Format-specific hiding spots worth checking directly rather than just eyeballing the rendered document: Excel cell comments/notes and far-off-screen cells, PDF hidden layers or embedded-but-not-displayed text objects, and Word document properties/custom XML parts, all of which render invisibly but are still part of the extracted text content a retrieval system ingests.",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'Microsoft Purview audit log (the Unified Audit Log, UAL)',
       artifact: "Copilot interaction/activity logging, where available — Microsoft has been expanding audit coverage for Copilot interactions, but exact operation names and level of detail are still evolving; confirm current coverage against Microsoft's own documentation rather than assuming a specific event name",
     },

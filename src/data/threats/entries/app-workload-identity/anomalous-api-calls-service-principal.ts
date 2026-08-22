@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'service-principal-signin-logs',
       source: 'AADServicePrincipalSignInLogs',
       artifact: "Sign-in frequency, timing, or IP pattern deviating from the service principal's own historical baseline (requires its own Diagnostic Setting to reach a Sentinel workspace, separate from interactive SigninLogs)",
     },
@@ -21,6 +22,7 @@ const entry: ThreatEntry = {
       artifact: "API call volume or endpoint diversity for the service principal exceeding its normal operational pattern",
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'CloudAppEvents',
       artifact: "New API scopes or resource types being accessed by the service principal that it hasn't touched before",
     },
@@ -29,6 +31,7 @@ const entry: ThreatEntry = {
       artifact: "The service principal's granted permissions, to distinguish anomalous-but-within-scope activity from an attempt to exceed granted scope",
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Failed authorization attempts (403s) for the service principal against resources outside its granted scope — reconnaissance-like probing behavior',
     },

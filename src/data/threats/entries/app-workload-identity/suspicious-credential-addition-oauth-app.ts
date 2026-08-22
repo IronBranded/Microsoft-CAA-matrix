@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Certificates-and-secrets management operations showing a new client secret or certificate added to an existing, already-trusted application",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "The acting identity and whether they're expected to manage that specific application's credentials — often requires only Application Administrator or ownership of the specific app, not a directory-wide role. Note that the credential's own displayName field (shown in the portal as a label like 'Prod cert' or a date) is a free-text value the adding identity sets — an attacker can label a newly-added secret to blend in with existing, legitimate-looking entries, so don't rely on the label alone to distinguish it from real credentials; the addition timestamp and acting identity are the reliable signals.",
@@ -26,6 +28,7 @@ const entry: ThreatEntry = {
       artifact: "The new credential's expiry — an attacker-added secret often has an unusually long expiry compared to the organization's normal rotation practice",
     },
     {
+      logSourceId: 'service-principal-signin-logs',
       source: 'Entra ID AADServicePrincipalSignInLogs',
       artifact: 'The first sign-in using the newly-added credential, and from where — attacker infrastructure rather than the application\'s normal deployment environment',
     },

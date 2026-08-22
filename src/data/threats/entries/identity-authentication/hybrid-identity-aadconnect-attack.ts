@@ -29,10 +29,12 @@ const entry: ThreatEntry = {
         "Access to or extraction of the encrypted AD DS Connector account credential from the Entra Connect server's local SQL/LocalDB instance — the credential a fully compromised Connect server can decrypt and use directly against on-prem AD",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'A new PTA agent registration, or Global Administrator activity immediately preceding one — registering a rogue agent from attacker-controlled infrastructure requires a compromised Global Admin session',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         'Successful PTA sign-ins under implausible conditions — an account whose on-prem password is known to have just been changed still authenticating successfully is the signature of a hooked validator returning true unconditionally',

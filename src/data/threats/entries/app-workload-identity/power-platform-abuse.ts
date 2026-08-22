@@ -17,6 +17,7 @@ const entry: ThreatEntry = {
       artifact: 'New Power Automate flows or Power Apps created by an account with no prior history of building automation, especially ones with HTTP/webhook actions pointing to external URLs',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: 'Flow creation/modification events and the specific connectors used, particularly HTTP or connectors to external/personal cloud storage — Power Platform activity is captured in the same UAL as Exchange/SharePoint, provided it is enabled for the tenant',
     },
@@ -30,6 +31,7 @@ const entry: ThreatEntry = {
       artifact: 'Actual execution history showing the flow firing and the volume/content of data it moved — confirms real effect, not just configuration',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The creating account's sign-in context, to establish whether flow creation itself followed a known-compromise pattern",
     },

@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "'User registered security info' operations for a FIDO2 security key or passkey, on an account with no expected reason to be re-registering MFA",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "The registration event's initiating session — IP, device, and whether it followed a known token-theft or account-compromise event elsewhere in this matrix",
     },
@@ -25,6 +27,7 @@ const entry: ThreatEntry = {
       artifact: 'Whether FIDO2/passkey self-service registration requires re-authentication with an existing strong factor, or can be added with only a recently-obtained session — the latter is what makes this technique viable',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'Subsequent sign-ins authenticating via the newly-registered FIDO2 key/passkey — confirms the attacker is actively using their new persistent credential',
     },

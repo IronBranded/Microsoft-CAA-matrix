@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Microsoft.Compute/virtualMachines/extensions/write — deployment of a new VM extension, most commonly CustomScriptExtension or its Linux equivalent (requires a Diagnostic Setting routing the Activity Log to your workspace)',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: "The extension's publisher/type and settings/protectedSettings parameters — protectedSettings are encrypted at rest but still readable by anyone with sufficient RBAC to view the extension configuration, or by the VM Agent at execution time",
     },
@@ -26,10 +28,12 @@ const entry: ThreatEntry = {
         "The deployed script content and execution logs under the extension handler's local directory, recoverable shortly after execution — typically under C:\\Packages\\Plugins\\ on Windows and /var/lib/waagent/ on Linux, though exact paths vary by Azure VM Agent version; confirm the current layout on the specific OS/agent combination rather than assuming the path is identical across the fleet.",
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceProcessEvents (VM guest OS)',
       artifact: 'A process tree rooted in the extension handler rather than an interactive session, similar in signature to Run Command abuse',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: "The caller's Azure RBAC role and whether extension deployment is expected for that identity — requires the same class of Contributor-level access as Run Command",
     },

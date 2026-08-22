@@ -14,10 +14,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: "A high-volume burst of file-modification operations across many files in a short window — the signature of automated, scripted mass encryption rather than normal user editing",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: "Audit events for changes to organization-, site-, or library-level version history limits — Microsoft's own documentation confirms these are logged, occurring shortly before or during the mass-modification burst; exact operation names are worth confirming against a live tenant since this is a newer audit category",
     },
@@ -30,6 +32,7 @@ const entry: ThreatEntry = {
       artifact: 'For files where prior versions still exist, comparing the current (encrypted) version against the last known-good version is the most direct path to both scoping the damage and recovering content — check before any retention window on old versions expires',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs / AADNonInteractiveUserSignInLogs',
       artifact: 'The identity and session performing the bulk modifications — the same account-compromise or over-permissioned-app patterns as Graph API Bulk Exfiltration, since the access method is the same',
     },

@@ -13,14 +13,17 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: "Outbound messages from the compromised mailbox to other internal recipients requesting fund transfers, credential entry, or clicking links — distinguishable from external BEC by recipient domain matching the tenant's own",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: 'MailItemsAccessed on internal correspondence threads immediately before crafting a convincing internal lateral-phish reply — requires E5 or Audit (Premium); not available on E3 (see the Acquisition Guide)',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The session sending internal lateral-phishing messages, for IP/device consistency check against the mailbox owner's normal pattern",
     },

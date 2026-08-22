@@ -14,14 +14,17 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity (Exchange Admin Audit Log — part of the Unified Audit Log)',
       artifact: "Operation == 'New-TransportRule' or 'Set-TransportRule' with BlindCopyTo, RedirectMessageTo, or similar recipient-manipulation parameters — org-wide, applying regardless of the target mailbox's own settings",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: 'Transport rule parameters that strip or downgrade sensitivity labels (removing or modifying classification headers) — used to evade DLP that keys off those labels',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact: 'A transport rule scoped narrowly — specific senders, specific keywords, or a specific distribution list — rather than broadly; narrow scoping is itself a signal, suggesting deliberate targeting rather than a legitimate org-wide compliance rule',
     },
@@ -30,6 +33,7 @@ const entry: ThreatEntry = {
       artifact: 'How the acting account obtained Exchange Administrator or an equivalent custom role — this technique requires that privilege, so its origin matters',
     },
     {
+      logSourceId: 'message-trace-log',
       source: 'Message Trace',
       artifact: 'Messages matching the rule criteria showing the blind-copy or redirect action actually firing — confirms the rule was live and had real effect, not just configured',
     },

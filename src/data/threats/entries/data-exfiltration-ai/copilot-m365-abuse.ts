@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'Microsoft Purview audit log (the Unified Audit Log, UAL)',
       artifact: 'Copilot interaction records, where audit coverage exists — as with Indirect Prompt Injection elsewhere in this matrix, exact coverage is still evolving; confirm current logging against Microsoft\'s own documentation',
     },
@@ -21,10 +22,12 @@ const entry: ThreatEntry = {
       artifact: 'A sudden shift in how an account interacts with M365 content — heavy Copilot query volume replacing what was previously manual browsing/search',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'SharePoint/OneDrive/Exchange access logs — OfficeActivity in the UAL',
       artifact: 'Content access patterns immediately following Copilot queries, showing what was actually retrieved and surfaced in response',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The session context of unusually heavy Copilot usage, for consistency check against the account's normal behavior",
     },

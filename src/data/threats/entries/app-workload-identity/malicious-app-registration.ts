@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Add application' — a new app registration created, worth reviewing especially where registration isn't restricted to approved admins",
     },
@@ -21,10 +22,12 @@ const entry: ThreatEntry = {
       artifact: 'Multi-tenant configuration — multi-tenant apps can be consented to from any tenant, useful for an attacker wanting persistent, portable access',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Credentials added to the new app registration immediately after creation — establishing how the attacker intends to authenticate as it going forward',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Requested API permissions/scopes on the new registration — broad Graph permissions on a brand-new, unfamiliar app are a strong signal',
     },

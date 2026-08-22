@@ -18,16 +18,19 @@ const entry: ThreatEntry = {
       artifact: "Access to the token-signing certificate's private key store, or unusual `Get-AdfsCertificate` / certificate export activity",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         "AuthenticationProtocol == 'SAML' or 'WsFed' for sign-ins that are implausible given the asserted user's normal behavior — service accounts, or disabled-but-not-deleted federated accounts",
     },
     {
+      logSourceId: 'adfs-signin-logs',
       source: 'ADFSSignInLogs (requires diagnostic logging enabled on the federation server)',
       artifact:
         "A SAML/WsFed sign-in present in Entra ID SigninLogs with NO corresponding entry in ADFSSignInLogs for the same user/time — a forged assertion is minted offline and submitted directly, so the real AD FS server never processes it",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "Federation configuration changes — new or modified federated domain trust settings, or a change to the token-signing certificate thumbprint Entra ID trusts (`Update-MgDomainFederationConfiguration`)",

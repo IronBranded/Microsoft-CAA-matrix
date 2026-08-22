@@ -14,6 +14,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Microsoft.Compute/virtualMachines/runCommand/action — the RBAC action for Run Command; appears regardless of which script was executed, so the operation itself is the primary signal (requires a Diagnostic Setting routing the Activity Log to your workspace — confirm this exists before trusting an empty result)',
     },
@@ -23,6 +24,7 @@ const entry: ThreatEntry = {
         'RunCommand scripts execute via the Azure VM Agent and leave process/execution artifacts under the agent\'s working directories (e.g. the RunCommandHandler plugin path on Windows, or /var/lib/waagent on Linux) — the script content itself may be recoverable shortly after execution',
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceProcessEvents (VM guest OS)',
       artifact: 'A process tree rooted in the Azure VM Agent / Run Command handler rather than an interactive logon session — legitimate interactive administration does not look like this',
     },
@@ -31,6 +33,7 @@ const entry: ThreatEntry = {
       artifact: 'Boot Diagnostics / Serial Console access is a distinct control-plane action from Run Command, but with the same net effect: OS-level access without needing OS credentials',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: "The caller's identity and Azure RBAC role on the specific VM resource — Run Command requires only a Contributor-level (or custom role with the specific action) grant, not any OS-level credential",
     },

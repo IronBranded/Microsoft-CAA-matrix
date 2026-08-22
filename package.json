@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "validate:content": "tsx scripts/validate-content.ts",
+    "coverage": "tsx scripts/content-coverage.ts",
     "new:threat": "tsx scripts/new-threat.ts",
     "predeploy": "npm run validate:content && npm run build"
   },

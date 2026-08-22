@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'A burst of VM creation operations deploying many VMs in a short window, often GPU-optimized SKUs, from a caller with no prior history of provisioning at that scale (requires a Diagnostic Setting routing the Activity Log to your workspace)',
     },
@@ -21,15 +22,18 @@ const entry: ThreatEntry = {
       artifact: 'A sudden, sharp spend increase concentrated in compute — often the first signal noticed in practice, since it triggers billing alerts before any security-specific detection',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact:
         "VM deployments across unusual regions, geographically distant from the organization's normal footprint, sometimes chosen for GPU SKU availability or lower cost. A quota increase request (Microsoft.Capacity/resourceProviders/locations/serviceLimits or a support-ticket-driven quota bump) immediately preceding the deployment burst is often the actual first move — default subscription vCPU quotas are usually too low to deploy at cryptomining scale without one, making the quota request itself a checkable precursor event rather than just the resulting VMs.",
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceProcessEvents (VM guest OS)',
       artifact: 'Known cryptomining process names/command-line patterns, or sustained near-100% CPU/GPU utilization with no corresponding legitimate workload',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'The caller\'s identity and how they obtained sufficient quota/permissions to provision at this scale — often a compromised service principal rather than a human admin acting deliberately',
     },

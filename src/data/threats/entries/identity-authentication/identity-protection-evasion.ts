@@ -13,14 +13,17 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection',
       artifact: 'Consistently low-risk-scored sign-ins for an account later confirmed compromised — the absence of risk flags despite a real compromise is itself the retrospective artifact',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "Device/browser fingerprint closely matching the victim's own known devices — attacker infrastructure deliberately spoofing these values rather than using default tooling signatures",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'Sign-in velocity/geography carefully paced to avoid triggering impossible-travel detection — a gap consistent with plausible travel time rather than an obvious instantaneous jump',
     },
@@ -29,10 +32,12 @@ const entry: ThreatEntry = {
       artifact: 'Source IPs from residential proxy services rather than flagged datacenter/VPS ranges — a deliberate choice to avoid known-bad IP reputation lists',
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection risk detection history',
       artifact: 'A pattern of risk being detected then manually dismissed by an admin — worth checking whether that dismissal was itself legitimate or part of the same compromise',
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection — licensing context',
       artifact:
         "What 'evasion' actually means depends on tenant licensing: Free and P1 tenants only ever see a generic 'Additional risk detected' entry with no further detail behind it, even for detections that would show a specific type (impossible travel, anomalous token, etc.) on P2. An evasion analysis assuming P2-level detection granularity when the tenant is actually P1 will misjudge what the attacker needed to avoid in the first place — confirm licensing before concluding a gap in detection was evasion rather than a licensing ceiling.",

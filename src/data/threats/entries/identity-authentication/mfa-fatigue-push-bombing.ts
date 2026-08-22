@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'Multiple consecutive MFA push notification attempts for the same user within a short window, most showing a denial or timeout before an eventual approval',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The approving sign-in's time-of-day and IP compared to the account's normal pattern — push bombing often succeeds late at night or during a moment the user is likely to approve reflexively",
     },
@@ -26,6 +28,7 @@ const entry: ThreatEntry = {
         "Whether number matching was enabled and used correctly — a push approved without the correct number entered is a strong signal the approval was made carelessly. Also check whether the user tapped 'Report suspicious activity' on any of the denied prompts rather than just dismissing them — this specifically flags the account's risk state and is a distinct, stronger signal than a plain denial, but only if users know the feature exists and use it.",
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection',
       artifact: "'MFA fatigue' or unusual MFA prompt volume risk detection, if configured",
     },

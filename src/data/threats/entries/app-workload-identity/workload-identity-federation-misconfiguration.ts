@@ -18,10 +18,12 @@ const entry: ThreatEntry = {
         "The configured subject identifier pattern — overly broad patterns (trusting any branch/workflow in an org rather than one specific repo and branch) are the root cause of this technique's exploitability. A common concrete mistake: a subject pattern scoped to an entire organization or repository (e.g., anything matching repo:org/* or a pull_request-triggered workflow, which runs with the PR branch's own code) rather than a specific branch/environment/ref — a pull-request-scoped trust in particular means anyone who can open a PR, not just anyone who can merge to main, can mint a token.",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Federated identity credential creation or modification on an app registration',
     },
     {
+      logSourceId: 'service-principal-signin-logs',
       source: 'Entra ID AADServicePrincipalSignInLogs',
       artifact: "A sign-in via federated credential from an external OIDC issuer, where the actual originating workflow/subject doesn't match the intended, narrowly-scoped trust",
     },
@@ -30,6 +32,7 @@ const entry: ThreatEntry = {
       artifact: 'The actual workflow run that requested and received an Entra ID token via OIDC federation — cross-reference against what the subject pattern was supposed to restrict to',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "A recent broadening of a federated credential's subject/issuer/audience matching — narrowing from a specific repo+branch pattern to an org-wide wildcard is the direct enabler",
     },

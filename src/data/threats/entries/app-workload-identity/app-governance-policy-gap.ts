@@ -39,6 +39,7 @@ const entry: ThreatEntry = {
       'This entry describes an absence of capability rather than a detectable event — assessment here is a one-time or periodic posture review, not a KQL hunt for a specific indicator.',
       'The real cost of this gap only becomes visible in retrospect, when another scenario in this domain goes undetected longer than it should have specifically because no continuous monitoring existed.',
       'User consent settings and app governance tooling are complementary — tightening one without the other leaves a partial gap.',
+      'The Advanced Hunting proxy below depends on a specific connector, not just a Defender license: Defender for Cloud Apps > App connectors > Microsoft 365 activities has to be enabled, or CloudAppEvents holds no Office 365 audit data regardless of licensing.',
     ],
   },
 
@@ -52,6 +53,19 @@ const entry: ThreatEntry = {
 | where TimeGenerated > ago(90d)
 | where Category == "ApplicationManagement"
 | summarize EventCount = count(), DistinctApps = dcount(tostring(TargetResources[0].id))`,
+      },
+    },
+    defender: {
+      triage: {
+        title: 'Application-governance activity volume via CloudAppEvents (posture proxy)',
+        description:
+          "Advanced Hunting equivalent of the Sentinel proxy — same posture-review intent, not a detection. CloudAppEvents only carries Office 365 audit data (including app-consent and service-principal-credential events) when the Microsoft 365 activities connector is enabled under Defender for Cloud Apps; an empty result here more often means the connector is off than that no activity occurred. ActionType strings are matched loosely with has_any rather than pinned to exact literal text — Microsoft's own published examples for this table are inconsistent even in casing/spacing, so treat any exact-string match as something to verify against your tenant's actual data rather than trust outright.",
+        query: `CloudAppEvents
+| where Timestamp > ago(90d)
+| where Application == "Office 365"
+| where ActionType has_any ("consent", "service principal", "application", "certificate")
+| summarize EventCount = count() by ActionType
+| order by EventCount desc`,
       },
     },
   },

@@ -14,15 +14,18 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact: 'Outbound replies or new messages from the compromised mailbox to external recipients discussing payment, invoicing, or banking details — most reliably found via Message Trace / content search rather than metadata alone, since the fraud lives in the message body',
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity',
       artifact:
         "MailItemsAccessed events immediately preceding the fraudulent reply, showing the attacker reading an existing invoice/payment thread before crafting a convincing reply into it — this specific event type requires E5 or the Audit (Premium) add-on and isn't available on E3 (see the Acquisition Guide); if the tenant is E3-only, this particular artifact won't exist regardless of how thoroughly you search, and the investigation needs to rely on Message Trace and the surrounding sign-in telemetry instead.",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The session that sent the fraudulent message — IP, device, and timing, to distinguish attacker activity from the legitimate mailbox owner's own correspondence",
     },

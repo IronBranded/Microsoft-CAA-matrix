@@ -14,15 +14,18 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "Category == 'RoleManagement' with an OperationName indicating a PIM activation (directory role or Azure resource role)",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "TargetResources containing the activated role name and the requestor's stated justification, if your tenant requires one",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The activating user's sign-in immediately preceding the activation event, correlated by UserId and timestamp proximity",
     },
@@ -32,6 +35,7 @@ const entry: ThreatEntry = {
         "Built-in alerts such as 'Roles are being activated too frequently', 'Potential stale accounts in a privileged role', and 'Roles don't require multi-factor authentication for activation' — that last one is worth checking as a standing configuration issue independent of any specific incident, since an MFA-optional activation policy is exactly what makes a compromised-but-not-attacker-controlled-MFA account able to activate a role at all.",
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact:
         'Microsoft.Authorization/roleAssignments/write correlating to a PIM-eligible Owner/Contributor activation on a subscription or resource group',

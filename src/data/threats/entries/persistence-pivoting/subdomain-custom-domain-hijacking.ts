@@ -29,6 +29,7 @@ const entry: ThreatEntry = {
       artifact: 'Traffic to the affected subdomain being served by unexpected, non-organizational infrastructure',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Domain verification or federation configuration changes on a custom domain, if the takeover was leveraged toward tenant-level impact rather than just the subdomain itself',
     },

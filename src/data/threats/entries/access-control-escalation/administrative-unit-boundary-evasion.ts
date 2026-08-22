@@ -13,11 +13,13 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact:
         "Administrative Unit membership rule changes (for dynamic AUs) or direct membership additions (static AUs) that expand which objects fall under a delegated admin's scope. Dynamic AUs are the subtler case: a membership rule doesn't need to change at all for scope to expand — any newly-created user or device that happens to match an existing rule is auto-included with no discrete 'add member' event to alert on, so the rule's logic itself needs periodic review, not just its change history.",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "Changes to an AU's restricted-management setting — restricted AUs have stronger isolation guarantees, and disabling this weakens the boundary",
     },
@@ -26,10 +28,12 @@ const entry: ThreatEntry = {
       artifact: "The actual scoped role assignments within an AU compared to what the delegated admin is supposed to manage — scope creep here often accumulates gradually",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "A scoped admin's actions on objects outside their AU's boundary succeeding when they should have been denied — the practical symptom of a boundary gap being exploited",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Dynamic AU membership rule syntax — an overly broad rule accomplishes the same boundary expansion as a direct membership change but is easier to overlook',
     },

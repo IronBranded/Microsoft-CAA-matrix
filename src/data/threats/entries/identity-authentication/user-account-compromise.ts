@@ -13,23 +13,28 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'A high volume of failed sign-ins for a single account (brute force) or many accounts from a single source (password spray), followed by an eventual success',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact:
         "AADSTS50126 (invalid username or password) or AADSTS50053 (account locked) error codes clustering around the attack window. Note that Smart Lockout, on by default, tracks familiar vs. unfamiliar location/device separately — an attacker spraying from consistent infrastructure can trigger lockout faster than the raw failure count suggests, while a spray rotating through many source IPs/proxies can partially evade it by never looking 'familiar enough' to lock in the way a single persistent attacker would. The pattern of AADSTS50053 events (or their absence) says as much about the attacker's infrastructure discipline as it does about the account itself.",
     },
     {
+      logSourceId: 'identity-protection-risk-data',
       source: 'Entra ID Identity Protection',
       artifact: "'Password spray' risk detection — a purpose-built Identity Protection signal for exactly this pattern",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: "The eventual successful sign-in's IP/device/location compared against the account's historical baseline — attack infrastructure rarely matches",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Changes made immediately after a successful sign-in (MFA registration, app consent) — the first few minutes after a brute-force success are usually spent establishing persistence',
     },

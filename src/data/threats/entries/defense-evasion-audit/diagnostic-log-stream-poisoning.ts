@@ -14,10 +14,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: "Microsoft.Insights/diagnosticSettings write or delete operations against a resource's diagnostic settings — removing or narrowing which log categories get forwarded to a Log Analytics workspace, Event Hub, or Storage account",
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact:
         "For Entra ID's own tenant-level diagnostic settings specifically — the configuration forwarding SigninLogs/AuditLogs into Sentinel — these live under a separate resource provider, microsoft.aadiam/diagnosticSettings, distinct from the Microsoft.Insights provider general Azure resources use. Changes here are logged as a control-plane action distinct from the data-plane logs being forwarded, similar in spirit to the Unified Audit Log's own separate admin pipeline. A KQL query written only against Microsoft.Insights/diagnosticSettings will miss this provider entirely — see the triage query below.",

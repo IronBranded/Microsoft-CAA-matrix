@@ -14,24 +14,29 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact:
         "Operation == 'New-InboxRule' or 'Set-InboxRule' with ForwardTo/RedirectTo/ForwardAsAttachmentTo parameters pointing to an external domain, especially combined with DeleteMessage or MarkAsRead actions used to hide the forwarded copies — this entire detection depends on the UAL actually being enabled for the mailbox/tenant; see Unified Audit Log Disablement elsewhere in this matrix for what it looks like when it isn't",
     },
     {
+      logSourceId: 'unified-audit-log',
       source: 'OfficeActivity — the Unified Audit Log (UAL)',
       artifact:
         "Operation == 'Set-Mailbox' with a populated ForwardingSmtpAddress or ForwardingAddress parameter — the mailbox-level, more persistent forwarding vector",
     },
     {
+      logSourceId: 'message-trace-log',
       source: 'Exchange Online Message Trace',
       artifact: "A 'Forward' or 'Redirect' event immediately after delivery to the compromised mailbox, en route to an external recipient with no legitimate business relationship",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'The sign-in immediately preceding the rule creation — establishes whether it came from the normal device/location or attacker infrastructure',
     },
     {
+      logSourceId: 'defender-office365-hunting',
       source: 'Microsoft Defender for Office 365',
       artifact: "Alert 'Suspicious email forwarding activity' or 'Creation of forwarding/redirect rule to external domain', if Plan 2 is licensed",
     },

@@ -13,18 +13,22 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Microsoft.Compute/snapshots/write creating a new disk snapshot, or a disk write operation referencing an existing snapshot for export',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'Generation of a SAS access grant against the snapshot (beginGetAccess) — the actual mechanism that makes a normally-inaccessible managed disk downloadable (requires a Diagnostic Setting routing the Activity Log to your workspace — confirm this exists before trusting an empty result)',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'The destination of any export — a storage account, and specifically whether it is within the same subscription/tenant or belongs to an external subscription entirely',
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'The caller\'s Azure RBAC role and whether snapshot creation/export is expected for that identity — requires Contributor-level access on the source disk/VM',
     },

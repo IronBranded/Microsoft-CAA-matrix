@@ -18,14 +18,17 @@ const entry: ThreatEntry = {
         "UserAgent values inconsistent with known first-party or approved third-party clients — generic HTTP library defaults or entirely absent User-Agent headers. Common default signatures worth a standing watchlist entry, since they show up across many different tools rather than one specific attacker: python-requests/, curl/, Go-http-client/, axios/, PostmanRuntime/. None of these are inherently malicious — plenty of legitimate automation uses them too — but an unexplained one against a sensitive resource is worth checking.",
     },
     {
+      logSourceId: 'graph-activity-logs',
       source: 'Microsoft Graph Activity Logs',
       artifact: "API request volume/velocity from a given UserAgent+AppId combination inconsistent with the claimed client's normal behavior",
     },
     {
+      logSourceId: 'cloud-app-events',
       source: 'CloudAppEvents',
       artifact: "A UserAgent string that's new/unrecognized against the tenant's established baseline of client signatures",
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'Whether the app/account associated with the anomalous UserAgent has any corresponding legitimate registration or purpose',
     },

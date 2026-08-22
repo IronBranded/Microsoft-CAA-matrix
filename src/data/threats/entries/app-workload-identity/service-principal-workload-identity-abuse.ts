@@ -13,6 +13,7 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'service-principal-signin-logs',
       source: 'Entra ID AADServicePrincipalSignInLogs',
       artifact: "Sign-ins for a service principal from an IP inconsistent with its expected hosting environment — the signature of credential reuse from attacker infrastructure (this table requires its own Diagnostic Setting; it isn't bundled automatically with interactive SigninLogs routing)",
     },

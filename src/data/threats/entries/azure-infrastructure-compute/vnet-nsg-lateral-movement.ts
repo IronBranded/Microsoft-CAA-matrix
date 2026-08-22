@@ -13,19 +13,23 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'nsg-flow-logs',
       source: 'NSG Flow Logs (deprecated) / Virtual Network Flow Logs (current)',
       artifact:
         "Internal east-west traffic between VMs/subnets that shouldn't have a legitimate reason to communicate directly, given an overly permissive any-to-any NSG rule — this data doesn't exist at all unless Flow Logs are explicitly enabled, and NSG Flow Logs specifically stopped accepting new configurations in mid-2025 in favor of Virtual Network Flow Logs, the current recommended path. Check which one, if either, is actually configured before treating an empty result as clean — an environment predating the deprecation may still be relying on the older, no-longer-creatable NSG version.",
     },
     {
+      logSourceId: 'azure-activity-log',
       source: 'AzureActivity',
       artifact: 'The NSG rule configuration itself — broad source/destination ranges rather than specific, narrow rules between the subnets that actually need to talk',
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceNetworkEvents (VM guest OS)',
       artifact: "A compromised VM initiating connections to other internal VMs on ports/services beyond its own normal role",
     },
     {
+      logSourceId: 'defender-endpoint-hunting',
       source: 'DeviceLogonEvents (destination VM)',
       artifact: "Successful or attempted authentication on a second VM originating from the first compromised VM's internal IP, rather than from any expected management/jump-host source",
     },

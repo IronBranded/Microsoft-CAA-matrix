@@ -17,6 +17,7 @@ const entry: ThreatEntry = {
       artifact: 'The full population of app registrations compared against a maintained, approved inventory — shadow apps are definitionally the ones not on that list',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'App registration creation events attributed to individual developer/power-user accounts rather than a managed CI/CD or platform-team identity',
     },

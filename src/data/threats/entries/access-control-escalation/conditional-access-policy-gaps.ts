@@ -13,10 +13,12 @@ const entry: ThreatEntry = {
 
   forensicArtifacts: [
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: "OperationName == 'Update conditional access policy' with a change narrowing scope, adding an exclusion, or reducing enforcement (e.g. moving to report-only)",
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs (break-glass / emergency-access accounts)',
       artifact: 'Any sign-in activity for accounts specifically provisioned as CA-policy-excluded break-glass accounts, outside a documented emergency',
     },
@@ -25,10 +27,12 @@ const entry: ThreatEntry = {
       artifact: 'Periodic review of which users/groups/apps are currently excluded from each policy — not an event, but a state worth checking regularly since gaps often predate any single detectable action',
     },
     {
+      logSourceId: 'sign-in-logs',
       source: 'Entra ID SigninLogs',
       artifact: 'A sign-in that completed without MFA or device compliance for a user/app combination that should be covered by an existing policy — the practical symptom of a gap being actively exploited',
     },
     {
+      logSourceId: 'entra-audit-logs',
       source: 'Entra ID AuditLogs',
       artifact: 'The identity making CA policy changes and whether that activity fits their normal administrative pattern',
     },

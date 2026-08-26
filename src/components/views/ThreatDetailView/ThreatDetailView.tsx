@@ -9,6 +9,8 @@ import FrameworkMappings from '@/components/detail/FrameworkMappings/FrameworkMa
 import ForensicArtifactsTable from '@/components/detail/ForensicArtifactsTable/ForensicArtifactsTable'
 import TelemetryPanel from '@/components/detail/TelemetryPanel/TelemetryPanel'
 import KqlExplorer from '@/components/detail/KqlExplorer/KqlExplorer'
+import AuthFlowPanel from '@/components/detail/AuthFlowPanel/AuthFlowPanel'
+import TokenTimelinePanel from '@/components/detail/TokenTimelinePanel/TokenTimelinePanel'
 import RunbookPanel from '@/components/detail/RunbookPanel/RunbookPanel'
 import SectionNav from '@/components/detail/SectionNav/SectionNav'
 import RelatedScenarios from '@/components/detail/RelatedScenarios/RelatedScenarios'
@@ -35,13 +37,17 @@ export default function ThreatDetailView({ id }: ThreatDetailViewProps) {
   const domainMeta = DOMAIN_META[threat.domain]
   const hasArtifacts = Boolean(threat.forensicArtifacts && threat.forensicArtifacts.length > 0)
   const hasTelemetry = Boolean(threat.telemetry)
+  const hasAuthFlow = Boolean(threat.authFlow)
+  const hasTokenTimeline = Boolean(threat.tokenTimeline)
   const hasKql = Boolean(threat.kql && (threat.kql.sentinel || threat.kql.defender))
   const hasRunbook = Boolean(threat.runbook)
-  const hasDetail = hasArtifacts || hasTelemetry || hasKql || hasRunbook
+  const hasDetail = hasArtifacts || hasTelemetry || hasAuthFlow || hasTokenTimeline || hasKql || hasRunbook
 
   const sections = [
     hasArtifacts && { id: 'artifacts', label: 'Artifacts' },
     hasTelemetry && { id: 'telemetry', label: 'Telemetry' },
+    hasAuthFlow && { id: 'auth-flow', label: 'Auth Flow' },
+    hasTokenTimeline && { id: 'token-timeline', label: 'Token Timeline' },
     hasKql && { id: 'kql', label: 'Detection' },
     hasRunbook && { id: 'runbook', label: 'Runbook' },
   ].filter((s): s is { id: string; label: string } => Boolean(s))
@@ -86,6 +92,20 @@ export default function ThreatDetailView({ id }: ThreatDetailViewProps) {
         <section id="telemetry" className={styles.section}>
           <h2 className={styles.sectionLabel}>§ Telemetry</h2>
           <TelemetryPanel telemetry={threat.telemetry!} />
+        </section>
+      )}
+
+      {hasAuthFlow && (
+        <section id="auth-flow" className={styles.section}>
+          <h2 className={styles.sectionLabel}>§ Auth Flow</h2>
+          <AuthFlowPanel authFlow={threat.authFlow!} />
+        </section>
+      )}
+
+      {hasTokenTimeline && (
+        <section id="token-timeline" className={styles.section}>
+          <h2 className={styles.sectionLabel}>§ Token Timeline</h2>
+          <TokenTimelinePanel tokenTimeline={threat.tokenTimeline!} />
         </section>
       )}
 

@@ -1,0 +1,137 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.patternBadge {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+  color: var(--signal);
+  background: var(--signal-dim);
+}
+
+.patternBadge[data-pattern='cluster'] {
+  color: var(--sev-medium);
+  background: var(--sev-medium-bg);
+  border-color: color-mix(in srgb, var(--sev-medium) 30%, transparent);
+}
+
+.narrative {
+  font-size: 13px;
+  color: var(--paper-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* sequence: connected vertical timeline — order is load-bearing */
+.steps[data-pattern='sequence'] .step {
+  position: relative;
+  padding: var(--space-3) 0 var(--space-3) var(--space-5);
+  margin-left: 6px;
+  border-left: 2px solid var(--line-strong);
+}
+
+.steps[data-pattern='sequence'] .step:last-child {
+  border-left-color: transparent;
+}
+
+.steps[data-pattern='sequence'] .step::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: calc(var(--space-3) + 4px);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--signal);
+  border: 2px solid var(--panel);
+}
+
+/* cluster: unconnected cards — no implied order */
+.steps[data-pattern='cluster'] {
+  gap: var(--space-2);
+}
+
+.steps[data-pattern='cluster'] .step {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--panel-raised);
+}
+
+.stepCode {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sev-high);
+  white-space: nowrap;
+  min-width: 84px;
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stepLabel {
+  font-size: 13.5px;
+  color: var(--paper);
+  font-weight: 500;
+}
+
+.stepDetail {
+  font-size: 12.5px;
+  color: var(--paper-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.distinguish {
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-4);
+}
+
+.blockLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  margin-bottom: var(--space-3);
+}
+
+.distinguish p {
+  font-size: 13px;
+  color: var(--paper-muted);
+  line-height: 1.6;
+  margin: 0;
+}

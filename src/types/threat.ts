@@ -164,6 +164,99 @@ export const KqlQueriesSchema = z.object({
 export type KqlQueries = z.infer<typeof KqlQueriesSchema>
 
 // ---------------------------------------------------------------------------
+// Auth flow — the *typical* sign-in code sequence for this scenario, as
+// opposed to telemetry.relevantErrorCodes' unordered catalog of individual
+// code meanings. This is deliberately a separate field rather than an
+// ordering hint bolted onto relevantErrorCodes: a step here can reference a
+// code that has no relevantErrorCodes entry (a plain "0" success, or a
+// non-code milestone like a device-registration audit event), and the two
+// serve different reader intents — one is "what does this code mean", the
+// other is "what does the sequence of codes for THIS attack look like, and
+// how do I tell it apart from a lookalike elsewhere in the matrix".
+//
+// `pattern` matters and isn't cosmetic: 'sequence' means the steps are
+// causally ordered — the technique doesn't work unless they happen in that
+// order (e.g. device code issued, then victim authenticates, then attacker
+// polls). 'cluster' means the codes co-occur and are diagnostic together,
+// but no single fixed order is load-bearing (e.g. scripted sign-in
+// probing throwing a mix of failure/interrupt codes before an eventual
+// success, in whatever order the tooling happens to hit them). Getting this
+// wrong in either direction actively misleads triage — don't default to
+// 'sequence' just because steps happen to be listed in an array.
+// ---------------------------------------------------------------------------
+export const AuthFlowStepSchema = z.object({
+  /** ResultType/ErrorCode value ("50126", "0"), or a short non-numeric
+   *  milestone label ("device-registration") when the step isn't a sign-in
+   *  result code at all. */
+  code: z.string().min(1),
+  label: z.string().min(1),
+  detail: z.string().optional(),
+})
+export type AuthFlowStep = z.infer<typeof AuthFlowStepSchema>
+
+export const AuthFlowSchema = z.object({
+  pattern: z.enum(['sequence', 'cluster']),
+  /** 1-2 sentences framing how to read the steps below — required even
+   *  when it feels repetitive, because 'pattern' alone doesn't carry
+   *  enough nuance for a reader who lands straight on this section. */
+  narrative: z.string().min(1),
+  steps: z.array(AuthFlowStepSchema).min(1),
+  /** What tells this apart from another entry with an overlapping or
+   *  similar-looking code pattern — the actual "help link investigation
+   *  pivots to the right scenario" payoff. Omit if nothing else in the
+   *  matrix plausibly overlaps. */
+  distinguishingNotes: z.string().optional(),
+})
+export type AuthFlow = z.infer<typeof AuthFlowSchema>
+
+// ---------------------------------------------------------------------------
+// Token timeline — token/session lifecycle guidance specific to this
+// scenario: issuance and refresh cadence, effective lifetime, and what the
+// auth_time/amr claims (when present) or their SigninLogs equivalents
+// reveal for this particular attack.
+//
+// Two accuracy points that matter enough to repeat at every call site
+// rather than assume the reader already knows:
+//
+// 1. auth_time and amr are OPTIONAL claims in Microsoft Entra ID access
+//    tokens — an app has to explicitly request them, so a captured token
+//    may simply not have them regardless of how relevant they'd be. Never
+//    write entry content that assumes a captured token will have these.
+// 2. There is no separate "MFA timestamp" claim. Where MFA timing matters,
+//    SigninLogs.AuthenticationDetails (a per-step array with its own
+//    nested authenticationStepDateTime, authenticationMethod, and
+//    succeeded/authenticationStepResultDetail fields) is the more reliable
+//    and more consistently available source than anything decoded from a
+//    token — it doesn't depend on optional-claim configuration or on an
+//    investigator having captured a raw token at all. mfaInstant guidance
+//    should point there first and treat token claims as a secondary,
+//    supplementary check when one happens to have been captured.
+// ---------------------------------------------------------------------------
+export const TokenTimelineSchema = z.object({
+  /** iat behavior — typical issuance/refresh cadence for this attack, and
+   *  what an anomalous cadence would look like. */
+  issuance: z.string().min(1),
+  /** exp / effective lifetime — typical pattern, including anything that
+   *  extends it beyond the default (e.g. a PRT backing silent refresh). */
+  expiration: z.string().min(1),
+  /** auth_time behavior across refreshes — static (pinned to one original
+   *  interactive moment) vs. moving, and what that reveals here. */
+  authInstant: z.string().min(1),
+  /** amr behavior — typical values for this attack and what a mismatch or
+   *  absence means; note plainly when amr won't be present at all. */
+  authMethods: z.string().min(1),
+  /** When/whether MFA occurred for this attack — SigninLogs
+   *  AuthenticationDetails first, token amr+auth_time as a secondary
+   *  corroborating check per the module-level note above. */
+  mfaInstant: z.string().min(1),
+  /** Anything else worth pulling from token/session metadata for this
+   *  specific attack — reliance on prior auth context, a new interactive
+   *  auth where one shouldn't be, device/PRT binding, etc. */
+  otherContext: z.string().optional(),
+})
+export type TokenTimeline = z.infer<typeof TokenTimelineSchema>
+
+// ---------------------------------------------------------------------------
 // Runbook
 // ---------------------------------------------------------------------------
 export const RunbookSchema = z.object({
@@ -203,6 +296,8 @@ export const ThreatEntrySchema = z.object({
   mitre: z.array(FrameworkMappingSchema).optional(),
   atrm: z.array(FrameworkMappingSchema).optional(),
   kql: KqlQueriesSchema.optional(),
+  authFlow: AuthFlowSchema.optional(),
+  tokenTimeline: TokenTimelineSchema.optional(),
   runbook: RunbookSchema.optional(),
 })
 

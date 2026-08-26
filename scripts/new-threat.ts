@@ -104,6 +104,14 @@ const entry: ThreatEntry = {
   //   sentinel: { triage: { title: '...', query: \`...\` } },
   //   defender: { triage: { title: '...', query: \`...\` } },
   // },
+  // authFlow: {
+  //   pattern: 'sequence' | 'cluster', // sequence = order is load-bearing; cluster = codes co-occur, order isn't
+  //   narrative: '...',
+  //   steps: [{ code: '...', label: '...' }],
+  // },
+  // tokenTimeline: {
+  //   issuance: '...', expiration: '...', authInstant: '...', authMethods: '...', mfaInstant: '...',
+  // },
   // runbook: { triage: [], contain: [], investigate: [], recover: [] },
 }
 

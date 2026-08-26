@@ -36,6 +36,10 @@ interface DomainStats {
   noKql: string[]
   noErrorCodesDocumented: string[]
   noErrorCodesUnreviewed: string[]
+  noAuthFlowDocumented: string[]
+  noAuthFlowUnreviewed: string[]
+  noTokenTimelineDocumented: string[]
+  noTokenTimelineUnreviewed: string[]
 }
 
 function emptyStats(): DomainStats {
@@ -48,6 +52,10 @@ function emptyStats(): DomainStats {
     noKql: [],
     noErrorCodesDocumented: [],
     noErrorCodesUnreviewed: [],
+    noAuthFlowDocumented: [],
+    noAuthFlowUnreviewed: [],
+    noTokenTimelineDocumented: [],
+    noTokenTimelineUnreviewed: [],
   }
 }
 
@@ -60,6 +68,10 @@ function mergeInto(totals: DomainStats, stats: DomainStats) {
   totals.noKql.push(...stats.noKql)
   totals.noErrorCodesDocumented.push(...stats.noErrorCodesDocumented)
   totals.noErrorCodesUnreviewed.push(...stats.noErrorCodesUnreviewed)
+  totals.noAuthFlowDocumented.push(...stats.noAuthFlowDocumented)
+  totals.noAuthFlowUnreviewed.push(...stats.noAuthFlowUnreviewed)
+  totals.noTokenTimelineDocumented.push(...stats.noTokenTimelineDocumented)
+  totals.noTokenTimelineUnreviewed.push(...stats.noTokenTimelineUnreviewed)
 }
 
 /**
@@ -70,11 +82,18 @@ function mergeInto(totals: DomainStats, stats: DomainStats) {
  * wherever it applies, is a correlationMarkers entry starting with this
  * phrase — detected here so the report doesn't keep flagging reviewed,
  * intentionally-empty entries as if they were still open work.
+ *
+ * The same convention extends to authFlow and tokenTimeline (added for the
+ * per-scenario auth-code-flow / token-lifecycle sweep): plenty of entries
+ * — a transport rule backdoor, a UAL disablement — have no sign-in or
+ * token dimension at all, and that's a reviewed conclusion, not a gap.
  */
 const DELIBERATE_ABSENCE_MARKER = 'deliberately no relevantErrorCodes'
+const NO_AUTH_FLOW_MARKER = 'deliberately no authFlow'
+const NO_TOKEN_TIMELINE_MARKER = 'deliberately no tokenTimeline'
 
-function hasDocumentedAbsence(correlationMarkers: string[] | undefined): boolean {
-  return (correlationMarkers ?? []).some((m) => m.includes(DELIBERATE_ABSENCE_MARKER))
+function hasDocumentedAbsence(correlationMarkers: string[] | undefined, marker: string): boolean {
+  return (correlationMarkers ?? []).some((m) => m.includes(marker))
 }
 
 async function main() {
@@ -107,10 +126,26 @@ async function main() {
     else stats.noKql.push(t.id)
 
     if (!t.telemetry?.relevantErrorCodes || t.telemetry.relevantErrorCodes.length === 0) {
-      if (hasDocumentedAbsence(t.telemetry?.correlationMarkers)) {
+      if (hasDocumentedAbsence(t.telemetry?.correlationMarkers, DELIBERATE_ABSENCE_MARKER)) {
         stats.noErrorCodesDocumented.push(t.id)
       } else {
         stats.noErrorCodesUnreviewed.push(t.id)
+      }
+    }
+
+    if (!t.authFlow) {
+      if (hasDocumentedAbsence(t.telemetry?.correlationMarkers, NO_AUTH_FLOW_MARKER)) {
+        stats.noAuthFlowDocumented.push(t.id)
+      } else {
+        stats.noAuthFlowUnreviewed.push(t.id)
+      }
+    }
+
+    if (!t.tokenTimeline) {
+      if (hasDocumentedAbsence(t.telemetry?.correlationMarkers, NO_TOKEN_TIMELINE_MARKER)) {
+        stats.noTokenTimelineDocumented.push(t.id)
+      } else {
+        stats.noTokenTimelineUnreviewed.push(t.id)
       }
     }
   }
@@ -134,6 +169,12 @@ async function main() {
   console.log(
     `Entries with zero relevantErrorCodes: ${totalNoCodes}/${totals.total} — ${totals.noErrorCodesDocumented.length} of those are reviewed with a documented reason (e.g. a well-executed AiTM sign-in has no distinguishing code by design), ${totals.noErrorCodesUnreviewed.length} are genuinely unreviewed. Only the unreviewed count is open work.`,
   )
+  console.log(
+    `Entries with no authFlow: ${totals.noAuthFlowDocumented.length + totals.noAuthFlowUnreviewed.length}/${totals.total} — ${totals.noAuthFlowDocumented.length} documented absence, ${totals.noAuthFlowUnreviewed.length} unreviewed.`,
+  )
+  console.log(
+    `Entries with no tokenTimeline: ${totals.noTokenTimelineDocumented.length + totals.noTokenTimelineUnreviewed.length}/${totals.total} — ${totals.noTokenTimelineDocumented.length} documented absence, ${totals.noTokenTimelineUnreviewed.length} unreviewed.`,
+  )
   console.log('')
   console.log('--- Per domain ---')
 
@@ -150,6 +191,18 @@ async function main() {
     }
     if (stats.noErrorCodesDocumented.length > 0) {
       console.log(`  relevantErrorCodes deliberately absent (documented): ${stats.noErrorCodesDocumented.join(', ')}`)
+    }
+    if (stats.noAuthFlowUnreviewed.length > 0) {
+      console.log(`  authFlow NOT reviewed yet: ${stats.noAuthFlowUnreviewed.join(', ')}`)
+    }
+    if (stats.noAuthFlowDocumented.length > 0) {
+      console.log(`  authFlow deliberately absent (documented): ${stats.noAuthFlowDocumented.join(', ')}`)
+    }
+    if (stats.noTokenTimelineUnreviewed.length > 0) {
+      console.log(`  tokenTimeline NOT reviewed yet: ${stats.noTokenTimelineUnreviewed.join(', ')}`)
+    }
+    if (stats.noTokenTimelineDocumented.length > 0) {
+      console.log(`  tokenTimeline deliberately absent (documented): ${stats.noTokenTimelineDocumented.join(', ')}`)
     }
   }
 }

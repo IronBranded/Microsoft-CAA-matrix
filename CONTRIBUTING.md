@@ -1,6 +1,6 @@
 # Contributing
 
-All 58 scenarios in the current taxonomy are complete, so the most useful
+All 59 scenarios in the current taxonomy are complete, so the most useful
 contribution right now is either a new scenario beyond the original 58, or
 keeping existing content accurate as Microsoft's documentation, licensing,
 and product surface changes — table names get deprecated, license tiers

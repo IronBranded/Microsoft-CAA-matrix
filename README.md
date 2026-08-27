@@ -11,11 +11,11 @@ and Azure Infrastructure attack and abuse scenarios.
 
 ## What's in it
 
-**58 scenarios across 8 domains:**
+**59 scenarios across 8 domains:**
 
 | Domain | Scenarios | Focus |
 |---|---|---|
-| Identity & Authentication | 12 | Tokens, PRTs, passkeys, AiTM, device code phishing |
+| Identity & Authentication | 13 | Tokens, PRTs, passkeys, AiTM, device code phishing |
 | Access Control & Escalation | 6 | Conditional Access, role groups, PIM |
 | Azure Infrastructure & Compute | 7 | IMDS, Run Command, VM extensions, snapshots |
 | App & Workload Identity | 11 | OAuth, service principals, workload identity federation, Power Platform |

@@ -103,8 +103,9 @@ AzureActivity
     defender: {
       triage: {
         title: 'Managed identity sign-ins from multiple IPs',
-        description: 'AADSpnSignInEventsBeta covers both service principal and managed identity sign-ins in Advanced Hunting.',
-        query: `AADSpnSignInEventsBeta
+        description:
+          'EntraIdSpnSignInEvents replaces the deprecated AADSpnSignInEventsBeta (old queries auto-migrate 2026-10-19) and covers both service principal and managed identity sign-ins in Advanced Hunting. The table rename is confirmed against current Microsoft Learn documentation; the SPN-specific columns below (ServicePrincipalId, ServicePrincipalName, IsManagedIdentity) carried over unchanged on the sign-in-events side of this same rename, but weren\'t independently re-checked column-by-column — verify against your tenant\'s live schema before relying on this in production.',
+        query: `EntraIdSpnSignInEvents
 | where Timestamp > ago(7d)
 | where IsManagedIdentity == true
 | summarize SignInCount = count(), DistinctIPs = dcount(IPAddress) by ServicePrincipalId, ServicePrincipalName

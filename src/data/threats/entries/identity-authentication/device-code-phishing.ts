@@ -146,34 +146,29 @@ union CloudAppEvents, OfficeActivity, AzureActivity
       triage: {
         title: 'Successful device code sign-ins',
         description:
-          'Advanced Hunting equivalent of the Sentinel triage query. Device-code is not always a flat column in this table — verify against your current schema, or parse AdditionalFields as shown.',
-        query: `// Device code sign-ins are not surfaced as a dedicated top-level column in
-// AADSignInEventsBeta the way AuthenticationProtocol is in Sentinel's SigninLogs.
-// Parse the AdditionalFields JSON blob for the protocol marker, and confirm the
-// exact field name against the current Advanced Hunting schema reference for
-// your tenant before relying on this in production detections.
-AADSignInEventsBeta
+          'AADSignInEventsBeta is deprecated in favor of EntraIdSignInEvents (old queries auto-migrate 2026-10-19, but this reference should read correctly today rather than rely on that). The new table drops AdditionalFields entirely, so this no longer parses JSON for the protocol marker — instead it mirrors the ErrorCode 50199-then-0 pairing Microsoft itself hunts on for this exact technique: a CmsiInterrupt immediately followed by success is the fingerprint of a user pausing to read/enter a device code, which is protocol-agnostic and doesn\'t depend on an unverified column.',
+        query: `EntraIdSignInEvents
 | where Timestamp > ago(7d)
-| where ApplicationName !in ("Visual Studio Code", "Microsoft Azure CLI")
-| where ErrorCode == 0
-| where IsManagedIdentity == false
-| extend AuthProtocol = tostring(AdditionalFields.authenticationProtocol)
-| where AuthProtocol =~ "deviceCode"
-| project Timestamp, AccountUpn, IPAddress, ApplicationName, Country, RequestId, CorrelationId`,
+| where Application !in ("Visual Studio Code", "Microsoft Azure CLI")
+| summarize ErrorCodes = make_set(ErrorCode), Apps = make_set(Application) by AccountUpn, CorrelationId, SessionId, bin(Timestamp, 1h)
+| where ErrorCodes has_all (0, 50199)
+// Secondary, less-verified check: the EndpointCall column (new in this table) carries
+// endpoint/request-type detail that may narrow this further to device-code specifically —
+// Microsoft's own April 2026 hunting guidance for this technique checks EndpointCall
+// (referenced there as "Call") for a "Cmsi:cmsi" substring on the confirmation step.
+// Confirm the exact value your tenant populates before adding it as a hard filter.
+| project TimeGenerated = Timestamp, AccountUpn, CorrelationId, SessionId, ErrorCodes, Apps`,
       },
       escalation: {
         title: 'Device code sign-in via Authentication Broker targeting Device Registration Service',
         description:
-          "Advanced Hunting equivalent of the Sentinel escalation query. ApplicationId and resource fields for this table have shifted across schema updates before — confirm the exact field names against your current Advanced Hunting schema reference rather than assuming this matches Sentinel's column naming.",
-        query: `AADSignInEventsBeta
+          'EntraIdSignInEvents equivalent of the Sentinel escalation query. ResourceId is a native top-level column on this table (unlike the deprecated AADSignInEventsBeta, which needed AdditionalFields parsing for it) — one less thing to verify against a JSON blob.',
+        query: `EntraIdSignInEvents
 | where Timestamp > ago(7d)
 | where ApplicationId == "29d9ed98-a469-4536-ade2-f981bc1d605e" // Microsoft Authentication Broker
-| where ErrorCode == 0
-| extend AuthProtocol = tostring(AdditionalFields.authenticationProtocol)
-| where AuthProtocol =~ "deviceCode"
-| extend ResourceId = tostring(AdditionalFields.resourceId)
 | where ResourceId == "01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9" // Device Registration Service
-| project Timestamp, AccountUpn, IPAddress, Country, RequestId, CorrelationId`,
+| where ErrorCode == 0
+| project Timestamp, AccountUpn, IPAddress, Country, RequestId, CorrelationId, SessionId`,
       },
     },
   },

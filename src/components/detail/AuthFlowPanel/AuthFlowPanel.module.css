@@ -91,14 +91,17 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--sev-high);
-  white-space: nowrap;
+  flex-shrink: 0;
   min-width: 84px;
+  max-width: 130px;
+  overflow-wrap: break-word;
 }
 
 .stepBody {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .stepLabel {

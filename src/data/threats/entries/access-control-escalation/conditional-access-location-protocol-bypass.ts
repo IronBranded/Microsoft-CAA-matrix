@@ -95,6 +95,37 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "Same fundamental shape as conditional-access-policy-gaps — a sign-in that completes without the friction a location-based policy should have applied — but the mechanism is different: here the policy itself is working correctly, evaluating exactly the IP/network signal it's configured to check. The gap is in what that signal actually represents, not in whether the policy fires.",
+    steps: [
+      {
+        code: '0',
+        label: 'Sign-in evaluated as originating from a trusted location, completes without location-based friction',
+        detail: "The policy engine did its job correctly given the input — the IP genuinely falls inside the configured trusted range, or the request arrived on a protocol (IPv6) the range was never built to cover. This isn't a policy failure the way a report-only or excluded-user gap is; it's a scoping failure in what the trusted range represents.",
+      },
+      {
+        code: '53003',
+        label: '(For comparison) what the same account/app combination produces from a genuinely untrusted network',
+        detail: "Confirms the policy logic itself is intact and would have blocked this sign-in if the network signal hadn't misrepresented itself as trusted.",
+      },
+    ],
+    distinguishingNotes:
+      "Don't conflate this with conditional-access-policy-gaps even though the sign-in-log symptom looks identical (a plain 0 where you'd expect 53003) — the fix is completely different. A policy gap needs a configuration change to the policy or its exclusions; this needs a correction to what the named location actually represents (narrower CIDR ranges, IPv6 coverage), since the policy logic itself was never broken.",
+  },
+
+  tokenTimeline: {
+    issuance: 'Issued exactly as it would be for any successful sign-in — the bypass affects whether location-based friction applies, not the token issuance mechanics themselves.',
+    expiration: 'Standard lifetimes, unaffected by this scenario specifically.',
+    authInstant: 'auth_time reflects an ordinary sign-in moment — nothing about this claim distinguishes a spoofed-trusted-network sign-in from a genuinely trusted one.',
+    authMethods:
+      'amr reflects whatever the user actually provided, which may be less than a properly location-scoped policy would have demanded — same practical symptom as conditional-access-policy-gaps, worth checking for the same reason.',
+    mfaInstant: "Absent where the bypassed policy would have required a step-up — there's no MFA instant because the location signal made that requirement never apply.",
+    otherContext:
+      'This scenario is discoverable largely through IP intelligence correlation (is this ASN/organization actually what the named location claims to represent?) rather than anything in the token or sign-in event itself — the token side of this is deliberately unremarkable, same as the sibling policy-gaps entry.',
+  },
+
   runbook: {
     triage: [
       'Verify the actual configured IP ranges for each named location against what they are supposed to represent.',
@@ -103,9 +134,9 @@ const entry: ThreatEntry = {
       'Identify which policies and resources were actually reachable through the bypass.',
     ],
     contain: [
-      'Remove or narrow the overly-broad named location range.',
+      "Remove or narrow the overly-broad named location range: `Update-MgIdentityConditionalAccessNamedLocation -NamedLocationId <id> -BodyParameter @{ ... }`. The exact body shape depends on whether it's an IP-based or country-based location object — worth checking against the portal first if you're not already scripting named-location management regularly.",
       'Add explicit IPv6 blocking or coverage to affected CA policies.',
-      'Revoke sessions relying on the bypass.',
+      'Revoke sessions relying on the bypass: `Revoke-MgUserSignInSession -UserId <UPN>`.',
       'Temporarily tighten the affected policy while remediation is underway.',
     ],
     investigate: [

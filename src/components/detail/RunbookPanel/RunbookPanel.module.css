@@ -98,6 +98,16 @@
   line-height: 1.6;
 }
 
+.stepCode {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--panel-raised);
+  border: 1px solid var(--line);
+  padding: 0.05em 0.4em;
+  border-radius: var(--radius-sm);
+  color: inherit;
+}
+
 .stepText[data-checked='true'] {
   color: var(--paper-faint);
   text-decoration: line-through;

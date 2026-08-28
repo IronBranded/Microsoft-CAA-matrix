@@ -103,6 +103,42 @@ AADServicePrincipalSignInLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "Same structural pattern as fido2-passkey-registration-hijacking in Domain 1 — a persistence mechanism that only becomes relevant after some other compromise already granted the attacker rights to manage the app. This entry's job is the middle link: the credential addition itself, and its first subsequent use.",
+    steps: [
+      {
+        code: 'admin-access-obtained',
+        label: "Attacker obtains rights sufficient to manage the target application's credentials",
+        detail: "Not this entry's mechanism — could be Application Administrator, or ownership of just the one app. See whichever compromise scenario elsewhere in this matrix actually applies to how that access was obtained.",
+      },
+      {
+        code: 'credential-added',
+        label: 'A new client secret or certificate is added to the existing application',
+        detail: "AuditLogs event under Certificates and secrets management. The original credential is untouched and keeps working, which is precisely why this persists quietly — nothing about the app's normal operation changes.",
+      },
+      {
+        code: '0',
+        label: 'First sign-in using the newly-added credential',
+        detail: "AADServicePrincipalSignInLogs — the point this stops being a configuration change and becomes active use. Multiple credentials can be valid simultaneously, so this event alone doesn't tell you the original credential is compromised too.",
+      },
+    ],
+    distinguishingNotes:
+      "Don't stop at removing the added credential and calling it done — trace backward to how the acting identity got rights to manage that app in the first place, the same discipline fido2-passkey-registration-hijacking calls for. If that access itself is still open, the attacker can simply add another credential after you remove this one.",
+  },
+
+  tokenTimeline: {
+    issuance: "Tokens from the newly-added credential are issued exactly like tokens from the original one — nothing at the token level distinguishes which of an app's multiple valid credentials was used to obtain it.",
+    expiration:
+      'Standard app-only token lifetimes apply per-issuance, but the credential itself is the durable asset — as with service-principal-workload-identity-abuse, the attacker can mint fresh tokens on demand for as long as the added credential remains valid, and attacker-added secrets often carry unusually long configured expiry (see forensicArtifacts).',
+    authInstant: 'Not meaningful in the interactive sense — this is the same non-interactive, machine-to-machine pattern as the rest of this domain.',
+    authMethods: 'amr is not populated for app-only tokens of this kind.',
+    mfaInstant: 'Not applicable.',
+    otherContext:
+      "The critical operational fact for this entry: removing the malicious credential does not tell you whether the app's original credential is also compromised, since AADSTS7000215/AADSTS700027 fire per-credential, not per-app. Confirm which specific credential is being used for any given sign-in before concluding the app is clean.",
+  },
+
   runbook: {
     triage: [
       'Identify which application had a credential added and by whom.',
@@ -111,8 +147,8 @@ AADServicePrincipalSignInLogs
       'Determine whether the app has multiple active credentials currently, and whether that count is expected.',
     ],
     contain: [
-      'Remove the unauthorized credential immediately — the legitimate one continues working, so this doesn\'t disrupt the app.',
-      'Revoke any sessions established using the malicious credential.',
+      "Remove the unauthorized credential specifically — not the original one. For a secret: `Remove-MgApplicationPassword -ApplicationId <id> -KeyId <keyId>`. For a certificate: `Remove-MgApplicationKey -ApplicationId <id> -BodyParameter @{ keyId = '<keyId>'; proof = '<proof-of-possession token>' }` (see service-principal-workload-identity-abuse for why the proof requirement makes this path more awkward mid-incident than the secret path). The legitimate credential continues working either way, so this doesn't disrupt the app.",
+      "There's no session to revoke for the malicious credential's own use — app-only tokens simply stop being mintable once the credential is removed, and any already-issued ones expire on their normal lifetime.",
       'Review for other unexpected credentials on the same app.',
       'Audit other applications the same actor has access to manage.',
     ],

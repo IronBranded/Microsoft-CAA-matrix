@@ -105,6 +105,38 @@ AzureActivity
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "Service principal authentication is non-interactive by design — there's no user, no browser redirect, no MFA concept at all. The flow is a direct client-credentials exchange: present the secret or certificate, receive a token. What's stolen here is the credential itself, not a session or a token in transit.",
+    steps: [
+      {
+        code: 'credential-leaked',
+        label: 'Client secret or certificate exposed (source control, insecure copy, etc.)',
+        detail: "No Entra ID telemetry — this happens wherever the leak occurred, entirely outside the identity platform's visibility.",
+      },
+      {
+        code: '0',
+        label: 'Attacker authenticates directly with the leaked credential via the client-credentials grant',
+        detail: 'AADServicePrincipalSignInLogs, not SigninLogs — a completely separate log from interactive user auth. This is the first point the theft becomes visible, and only if the credential is actually used, not merely leaked.',
+      },
+    ],
+    distinguishingNotes:
+      "Don't apply Domain 1 intuitions here — there's no MFA to bypass, no session cookie to steal, no interactive challenge of any kind. The entire attack surface is 'does the attacker have the secret,' full stop, which is exactly why AADSTS7000215/AADSTS700027 (invalid credential) matter so much here: they're your confirmation that a specific, known credential no longer works, in a flow with none of Domain 1's other telemetry richness.",
+  },
+
+  tokenTimeline: {
+    issuance: 'Issued immediately on successful credential presentation — no delay, no challenge, no interactive step of any kind.',
+    expiration:
+      'Standard app-only access token lifetimes. The credential itself (the secret or certificate) is the durable asset, not any single token — expiration of one token means the attacker simply requests another using the same still-valid credential.',
+    authInstant:
+      "Not meaningful in the interactive sense — there's no auth_time-equivalent moment tied to a specific device or user context, since this is a machine-to-machine exchange from whatever infrastructure holds the credential.",
+    authMethods: 'amr is not populated the way it is for user tokens — app-only tokens carry no interactive authentication method claim at all, since none was involved.',
+    mfaInstant: 'Not applicable — service principals cannot complete MFA, full stop, regardless of tenant policy.',
+    otherContext:
+      "The single most important fact about this scenario's token lifecycle is that it's entirely credential-gated: as long as the secret or certificate remains valid, the attacker can mint tokens indefinitely, on demand, with zero further friction. Containment lives entirely at the credential layer (rotate/revoke it) — there's no session or token-level control that helps here the way Revoke-MgUserSignInSession does for user accounts.",
+  },
+
   runbook: {
     triage: [
       'Identify the credential type (secret, certificate, or federated) and how it may have leaked.',
@@ -113,7 +145,7 @@ AzureActivity
       'Determine the timeline — when did the anomalous activity start relative to any known leak event?',
     ],
     contain: [
-      'Rotate or revoke the compromised credential immediately.',
+      "Rotate or revoke the compromised credential immediately. For a client secret: `Remove-MgApplicationPassword -ApplicationId <id> -KeyId <keyId>`. For a certificate, `Remove-MgApplicationKey` requires a proof-of-possession token for an existing key as part of the same request — awkward mid-incident, since generating that proof isn't always practical for a credential you're actively trying to kill; the portal's Certificates & secrets blade is often the more practical path for certificate removal specifically.",
       "Scope down the service principal's permissions if over-privileged relative to actual need.",
       'Review and remove any credentials added by an unexpected actor.',
       'Block identified attacker infrastructure at the network layer where applicable.',

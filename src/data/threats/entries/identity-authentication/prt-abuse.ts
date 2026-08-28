@@ -99,6 +99,41 @@ AADNonInteractiveUserSignInLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "The honest answer is that there isn't much of an interactive sequence to document. The theft itself — LSASS memory access — is a local OS event with no Entra ID telemetry at all, and the replay that follows is designed specifically to look like ordinary silent token renewal, not a distinguishable flow of its own. What's below is less a sequence of diagnostic codes and more a record of what doesn't happen (no interactive challenge, no MFA prompt) compared to a legitimate parallel case.",
+    steps: [
+      {
+        code: 'lsass-access',
+        label: 'PRT and session key extracted from LSASS memory on the source device',
+        detail: "No Entra ID telemetry — entirely local to the compromised endpoint. Sysmon Event ID 10 or Defender's suspicious LSASS access alerting is the only visibility into this step, and only where EDR coverage exists on that specific device.",
+      },
+      {
+        code: '0',
+        label: 'Non-interactive token refresh using the replayed PRT',
+        detail: 'Structurally identical to a legitimate silent SSO refresh — same ResultType, no MFA challenge because none is required for PRT-backed refresh by design. This is the one event that actually reaches Entra ID logging, and on its own it is not distinguishable from normal background token renewal.',
+      },
+    ],
+    distinguishingNotes:
+      "Resist the urge to look for a code that means \"this was PRT theft\" — there isn't one. The refresh event is deliberately unremarkable; the tell is everything around it (DeviceId consistency, IP/geography against the claimed device's pattern, whether the source device shows LSASS access at all), not anything in the AADSTS vocabulary itself. If you're expecting this entry to read like device-code-phishing's tight code sequence, that's the wrong mental model for this technique.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "The replayed PRT/derived tokens are issued whenever the attacker's infrastructure chooses to use them — potentially long after the actual LSASS extraction, since a stolen PRT remains usable until revoked or independently invalidated. There's no reliable way to pin \"issuance\" to a single moment from Entra ID telemetry alone; the extraction and the replay are separate events with no session linking them in the logs.",
+    expiration:
+      "PRTs are long-lived by design (rolling validity with continuous silent renewal) specifically so a device never has to re-prompt the user — exactly what makes a stolen one so durable. Effective persistence lasts until the account's TokensValidFrom is advanced (password reset, explicit revocation) or the PRT is independently invalidated some other way.",
+    authInstant:
+      "auth_time on tokens derived from a replayed PRT reflects whenever the device last did a real interactive sign-in — potentially weeks earlier, with zero relationship to when the theft or replay actually happened. Don't treat this claim as telling you anything about the incident timeline for this specific technique.",
+    authMethods:
+      "amr reflects the original interactive sign-in's methods, not anything about the replay. A PRT stolen from a device where the user completed real MFA carries amr values that make the resulting tokens look fully legitimate — close to the worst case for relying on amr as a signal anywhere in this matrix.",
+    mfaInstant:
+      "There isn't a fresh MFA instant to find for the replay itself — that's the entire point of a PRT. SigninLogs.AuthenticationDetails for the non-interactive refresh event typically shows no MFA step at all, which is expected, normal behavior here, not itself suspicious. Don't misread its absence as a red flag on its own.",
+    otherContext:
+      "Token-level evidence is genuinely limited by design for this technique, and the investigation has to lean on the device/endpoint side (Sysmon, EDR, TPM/attestation state) more than the identity side. If you only have Entra ID logs and nothing from the endpoint, be upfront with stakeholders that PRT abuse may be difficult to fully confirm or rule out from that vantage point alone.",
+  },
+
   runbook: {
     triage: [
       'Identify which device the abused PRT claims to be bound to, and verify whether that matches where it is actually being used from.',
@@ -107,10 +142,11 @@ AADNonInteractiveUserSignInLogs
       "Establish scope — a stolen PRT for a Global Admin's device is a very different severity than for a low-privilege user's.",
     ],
     contain: [
-      'Revoke sessions and tokens (`Revoke-MgUserSignInSession`) — this invalidates the PRT and forces re-authentication.',
+      "Revoke sessions and tokens: `Revoke-MgUserSignInSession -UserId <UPN>` — this invalidates the PRT's refresh capability and forces re-authentication.",
+      "Reset the account's password as well, alongside revocation rather than instead of it: `Update-MgUser -UserId <UPN> -PasswordProfile @{ Password = '<new password>'; ForceChangePasswordNextSignIn = $true }`. This is what advances TokensValidFrom — the timestamp behind the AADSTS50173 signal above.",
       'Isolate the source device if still reachable, and treat it as compromised pending investigation.',
       "If hardware-backed device protections weren't in place, treat that itself as a finding.",
-      'Consider requiring re-registration of the device (remove and re-join to Entra ID) rather than trusting its continued state.',
+      "Don't just re-trust the device once you're done with it — remove the object and require re-registration from a clean state: `Remove-MgDevice -DeviceId <deviceObjectId>` (verify the parameter name against your installed Microsoft.Graph module version; it has shifted across SDK releases).",
     ],
     investigate: [
       'Determine how the attacker got the access needed to dump LSASS in the first place — PRT theft is a late-stage capability on an already-compromised endpoint, not an entry point.',

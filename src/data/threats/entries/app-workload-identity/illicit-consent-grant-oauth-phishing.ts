@@ -110,6 +110,45 @@ OfficeActivity
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      'This is a genuinely interactive flow — the victim really does see and click through a real Microsoft consent prompt, which is what makes it effective. The deception is entirely in what app is asking, not in the platform surface doing the asking.',
+    steps: [
+      {
+        code: '65001',
+        label: 'Consent Required — user reaches the OAuth authorization prompt for an app they have not yet approved',
+        detail: 'A normal, expected code at this stage of any first-time OAuth consent flow, malicious or not. Its value here is purely as a timing anchor — the moment immediately preceding consent.',
+      },
+      {
+        code: 'consent-granted',
+        label: 'User accepts the prompt (AuditLogs: Consent to application)',
+        detail: 'The actual grant. ConsentType (Principal vs AllPrincipals) and whether offline_access is among the scopes are the two things that most determine severity from this single event.',
+      },
+      {
+        code: '0',
+        label: "The app's service principal begins using the granted scopes",
+        detail: 'A normal delegated-permission token issuance and use — nothing here looks different from a legitimate app the user genuinely intended to authorize.',
+      },
+    ],
+    distinguishingNotes:
+      "Watch for the absence variant, not just the presence variant: the ConsentFix technique noted in forensicArtifacts skips the app-registration and consent-prompt steps entirely by riding a pre-trusted first-party app's own authorization flow, so this code sequence never appears at all for that path. Unexplained delegated-scope activity with no matching consent event in AuditLogs is the tell — check the client AppId against Microsoft's first-party app list before concluding a clean audit trail means nothing happened.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      'The refresh token is issued at the moment of consent, not derived from any later action — offline_access in the granted scopes is specifically what makes a refresh token part of the grant at all, rather than a one-time authorization code.',
+    expiration:
+      "This is the entry's defining characteristic: the grant persists independent of the user's own credential lifecycle. A password reset doesn't revoke it. MFA re-registration doesn't revoke it. Only removing the app's service principal or the specific OAuth2 permission grant actually ends it — see the runbook contain steps, which is why they're structured the way they are.",
+    authInstant:
+      'auth_time reflects the original consent-flow sign-in, which for a returning session may itself have happened well before the consent click if the user was already signed in. Less useful here than in Domain 1, since the interesting timestamp for this scenario is the consent AuditLogs event, not any token claim.',
+    authMethods:
+      "amr reflects whatever the user's normal sign-in required — this scenario doesn't depend on or interact with MFA strength at all. A phishing-resistant MFA method stops credential theft; it does nothing to stop a user from clicking Accept on a consent prompt.",
+    mfaInstant: 'Not the relevant clock here. The moment that matters is the consent grant itself, in AuditLogs, not any MFA completion in SigninLogs.',
+    otherContext:
+      "This is one of the few Domain 4 scenarios where the durable artifact is neither a token nor a credential in the usual sense — it's a standing authorization grant, tracked as its own object (the OAuth2PermissionGrant) independent of any specific token. Investigate and remediate at that layer, not by chasing individual tokens.",
+  },
+
   runbook: {
     triage: [
       'Pull the consent audit event: who consented (self vs. admin), which app, and exactly which scopes.',
@@ -118,9 +157,9 @@ OfficeActivity
       'Identify how many other users in the tenant have consented to the same application, to size the blast radius.',
     ],
     contain: [
-      'Disable or delete the malicious app\'s service principal (`Remove-MgServicePrincipal`) — this immediately invalidates all its tokens and refresh tokens tenant-wide.',
-      "If removing tenant-wide isn't immediately feasible, revoke the specific user-to-app grant with `Remove-MgOauth2PermissionGrant`.",
-      "Revoke the affected user's own sessions as a precaution, since the phishing lure may have also harvested other credentials.",
+      "Disable or delete the malicious app's service principal: `Remove-MgServicePrincipal -ServicePrincipalId <id>` — this immediately invalidates all its tokens and refresh tokens tenant-wide.",
+      "If removing tenant-wide isn't immediately feasible, revoke the specific user-to-app grant instead: `Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId <id>`.",
+      "Revoke the affected user's own sessions as a precaution, since the phishing lure may have also harvested other credentials: `Revoke-MgUserSignInSession -UserId <UPN>`.",
       'Enable or tighten the admin consent workflow so future grants for high-risk scopes require administrator review.',
     ],
     investigate: [

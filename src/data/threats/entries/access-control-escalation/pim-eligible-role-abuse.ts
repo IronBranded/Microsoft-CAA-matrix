@@ -105,6 +105,46 @@ activations
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "This flow lives in AuditLogs role-activation events, not AADSTS sign-in codes — same shape as tap-misuse elsewhere in this matrix, where the interesting sequence isn't at the sign-in layer at all. As this entry's own correlationMarkers already note, there's no failure code for a successful activation, because PIM is, by definition, doing exactly what it was configured to do.",
+    steps: [
+      {
+        code: 'account-compromised',
+        label: 'Attacker obtains any authenticated session on an account holding a dormant PIM-eligible assignment',
+        detail: "Not this entry's mechanism — see whichever other entry in this matrix actually applies (token theft, AiTM, password compromise, etc.). What matters here is only that the session exists and the account happens to hold unused eligibility.",
+      },
+      {
+        code: 'role-activation-requested',
+        label: 'PIM activation requested for the eligible role',
+        detail: 'An AuditLogs RoleManagement event, not a sign-in event. Whether this succeeds depends entirely on activation policy — MFA-on-activation and approval requirements are real friction here, where they exist; their absence is a standing configuration gap, not something the attacker has to defeat.',
+      },
+      {
+        code: 'role-activation-completed',
+        label: 'Role becomes active for the configured time-bound window',
+        detail: "From this moment, the account's elevated privilege is real and unrestricted by anything PIM-specific — a Global Admin session behaves like any other Global Admin session for the duration of the window.",
+      },
+    ],
+    distinguishingNotes:
+      "The activation event itself looks completely routine if the account genuinely holds the eligible assignment — there's no 'this activation is malicious' flag. The signal is entirely in context: does the requestor's recent sign-in look like their normal pattern, and does the account's holding this eligibility in the first place make sense for its actual job function. An overly broad population of eligible assignments is itself a finding independent of any specific incident — see recover.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "The token/session predates the activation — PIM elevates what an already-authenticated session is authorized to do, it doesn't mint a fresh sign-in. Whatever authenticated the underlying session in the first place is a separate question this entry doesn't answer.",
+    expiration:
+      "The elevated privilege itself is time-bound by PIM's activation window (commonly 1-8 hours, tenant-configured) — a genuinely distinctive expiration concept versus most of this matrix, where token expiration and privilege expiration are the same thing. Here they're not: the underlying session token may outlive the PIM activation window, or vice versa, and re-checking whether a role is still active (not just whether it was activated) matters for scoping what the account could actually do at any given moment during an incident.",
+    authInstant:
+      "auth_time reflects whatever authenticated the underlying session, unrelated to the activation timestamp — for this entry specifically, the AuditLogs activation timestamp is the more useful anchor than any JWT claim.",
+    authMethods:
+      "amr reflects the underlying session's authentication, not anything about the PIM activation itself — activation may separately require its own MFA challenge depending on policy, which shows up in AuditLogs' activation event context rather than in amr on any token.",
+    mfaInstant:
+      "Where MFA-on-activation is enforced, the activation event itself carries that context in AuditLogs — check there rather than in sign-in-log MFA timing fields, which describe the original sign-in, not the later activation.",
+    otherContext:
+      "This is a genuinely different shape from most Domain 1 entries: the interesting lifecycle isn't the token's, it's the privilege's, and PIM tracks that separately from any single sign-in or token. Treat the activation window, not any token expiration, as the operative clock during investigation and containment.",
+  },
+
   runbook: {
     triage: [
       "Confirm whether the activation followed the tenant's normal approval workflow — was an approval actually granted, or does the role not require approval (a common misconfiguration)?",
@@ -113,7 +153,7 @@ activations
       "Verify the stated justification or ticket reference, if your tenant requires one, against an actual change ticket.",
     ],
     contain: [
-      'Deactivate the active PIM role assignment immediately, via the Entra portal or `Update-MgRoleManagementDirectoryRoleAssignmentScheduleRequest`.',
+      "Deactivate the active PIM role assignment immediately. PIM models this as creating a new schedule request with a removal action, not updating the assignment directly: `New-MgRoleManagementDirectoryRoleAssignmentScheduleRequest -BodyParameter @{ action = 'adminRemove'; principalId = '<user object id>'; roleDefinitionId = '<role definition id>'; directoryScopeId = '/' }`. The Entra portal does the same thing under the hood if you'd rather not script it.",
       'Revoke the user\'s sessions: `Revoke-MgUserSignInSession -UserId <UPN>`.',
       'Suspend the account pending investigation if the activation is confirmed malicious.',
       'Temporarily tighten PIM policy for the affected role — require approval and MFA-on-activation if not already enforced.',

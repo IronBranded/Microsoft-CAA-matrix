@@ -107,6 +107,46 @@ SigninLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "The relayed authentication itself is deliberately unremarkable — that's the whole design of an AiTM proxy. The AADSTS-level view of the victim's own sign-in looks completely normal, MFA included; this entry's own correlationMarkers note above explains why there's no relevantErrorCodes entry at all. What actually creates a detectable signature is downstream of the token, not in how it was obtained: the same session/token reused from a materially different context.",
+    steps: [
+      {
+        code: '0',
+        label: "Victim completes a genuinely real sign-in, including MFA, through the attacker's transparent proxy",
+        detail: "Indistinguishable from a legitimate sign-in at the AADSTS level — the proxy relays real traffic to the real Microsoft endpoint. This is precisely why there's no relevantErrorCodes entry on this scenario; there's nothing here to flag.",
+      },
+      {
+        code: 'cookie-captured',
+        label: "Session cookie captured by the proxy as it's issued",
+        detail: "No separate Entra ID telemetry — this happens on the attacker's infrastructure, sitting between the victim and the real sign-in response.",
+      },
+      {
+        code: '0',
+        label: 'Cookie replayed from attacker infrastructure',
+        detail: "Same session/token identifier as the first step's success, now appearing from a materially different IP, device, or location. This — not the original sign-in — is the actual detection point, and it's what the correlationMarkers and KQL above are built around.",
+      },
+    ],
+    distinguishingNotes:
+      "Resist framing this as a code-based detection problem — it isn't one. The two success events (original and replay) are each, individually, completely ordinary AADSTS 0s. The signal lives entirely in comparing session/token identifiers across sign-ins with inconsistent context, which is a correlation problem, not a code-lookup one. If you find yourself searching for an AiTM-specific error code, that search will come back empty by design.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued once, at the victim's genuinely real (proxied) sign-in — the replay doesn't mint a new token, it reuses the one already issued. Same fundamental shape as token-theft-session-hijacking, just with a specific, well-fingerprinted delivery mechanism (the AiTM proxy) rather than malware or LSASS access.",
+    expiration:
+      "Standard token lifetimes, with the same Continuous Access Evaluation caveat as elsewhere in this matrix — a stolen token can outlive its nominal expiry if nothing triggers revocation in the meantime. See token-theft-session-hijacking for the fuller CAE discussion, which applies identically here.",
+    authInstant:
+      "auth_time stays fixed to the original phishing moment across any subsequent refreshes, exactly as this entry's own correlationMarkers already note — the basis for the auth_time-matching technique in the investigate runbook. Optional claim; a captured token may not carry it.",
+    authMethods:
+      "amr reflects whatever real MFA method the victim actually used to get through the proxy — genuinely accurate, since the victim really did complete that authentication. This is exactly what makes AiTM dangerous: amr shows real, strong-looking factors even though the resulting session is fully attacker-controlled. Phishing-resistant methods (FIDO2, Windows Hello for Business) are the exception — their cryptographic origin-binding is what actually stops a proxy from relaying them successfully, not anything visible in amr after the fact.",
+    mfaInstant:
+      "SigninLogs.AuthenticationDetails on the original (proxied) sign-in shows a real, on-time MFA completion — there's no timing anomaly to find here, unlike some other scenarios in this matrix. The anomaly is entirely in the IP/device/location mismatch on the later replay, not in when MFA happened.",
+    otherContext:
+      "Because every individual event in this flow is genuinely ordinary, this is one of the strongest cases in the whole matrix for leaning on Identity Protection's purpose-built risk detections (anomalousToken, tokenIssuerAnomaly) rather than trying to hand-build detection logic from token claims.",
+  },
+
   runbook: {
     triage: [
       "Identify the flagged sign-in(s) and confirm whether Identity Protection's anomalous-token detection actually fired, or whether this surfaced by other means (user report, help desk).",
@@ -115,10 +155,10 @@ SigninLogs
       "Check whether the user's account is covered by Conditional Access Token Protection — if not, that's both why the theft succeeded and the first thing to fix.",
     ],
     contain: [
-      'Revoke the sessions and tokens immediately: `Revoke-MgUserSignInSession`.',
-      "Reset the user's password as a precaution — the same phishing page frequently captures it too, even though token theft alone doesn't strictly require a password reset to contain.",
+      'Revoke the sessions and tokens immediately: `Revoke-MgUserSignInSession -UserId <UPN>`.',
+      "Reset the user's password too — the same phishing page frequently captures it as well, even though token theft alone doesn't strictly require a password reset to contain: `Update-MgUser -UserId <UPN> -PasswordProfile @{ Password = '<new password>'; ForceChangePasswordNextSignIn = $true }`.",
       'Block the phishing domain and proxy infrastructure at your email security and web filtering layers.',
-      'Force MFA re-registration if there is any indication the attacker used the session to register their own MFA method.',
+      "If there's any indication the attacker used the session to register their own MFA method, remove it and force re-registration: `Get-MgUserAuthenticationMethod -UserId <UPN>` to find the ID, then the method-specific removal cmdlet.",
     ],
     investigate: [
       'Reconstruct what the stolen session was used for between theft and revocation, via AuditLogs/OfficeActivity/CloudAppEvents on the shared correlation/session identifiers.',

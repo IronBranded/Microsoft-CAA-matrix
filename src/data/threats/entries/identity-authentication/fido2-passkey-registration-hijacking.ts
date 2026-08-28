@@ -107,6 +107,46 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "The registration event itself is a single AuditLogs entry, but it's meaningless read in isolation — the flow that matters spans from whatever established the initiating session (a separate compromise, documented elsewhere in this matrix) through to the attacker's first subsequent sign-in using their new credential. This entry's job is that middle link, not the whole chain.",
+    steps: [
+      {
+        code: 'session-established',
+        label: 'Attacker obtains any authenticated session on the target account',
+        detail: "Not this entry's mechanism — see token-theft-session-hijacking, AiTM, device-code-phishing, or user-account-compromise for how. What matters here is only that a session exists, however briefly.",
+      },
+      {
+        code: 'security-info-registered',
+        label: 'FIDO2 security key or passkey registered against the account',
+        detail: 'The persistence-establishing step. Whether this succeeds depends entirely on tenant policy — specifically whether registration demands re-authentication with an existing strong factor, or accepts the session alone. See relevantErrorCodes for the two controls (AADSTS53004, AADSTS53010) that can block this step even after the initiating session was obtained.',
+      },
+      {
+        code: '0',
+        label: "Attacker's first sign-in using the newly-registered credential",
+        detail: "Confirms the persistence is live and being used. From this point forward, the attacker's access no longer depends on whatever got them the original session — a password reset alone won't remove it.",
+      },
+    ],
+    distinguishingNotes:
+      "Don't investigate this entry's registration event in isolation — always trace backward to how the initiating session was obtained (that's a different entry's flow) and forward to confirm whether the new credential was actually used (this entry's last step). A registration event with no subsequent sign-in on the new method might still be caught in time; one with confirmed subsequent use means the persistence is already active.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Two separate issuances matter here: the token from the initiating session (out of scope for this entry — see whichever compromise scenario actually applies), and the token from the attacker's first sign-in using their newly-registered method, which is a fully ordinary, independently-issued token going forward.",
+    expiration:
+      'Once registered, the new credential has no special expiration tied to the original compromise — it persists exactly as long as any legitimately-registered FIDO2 key/passkey would, which is indefinitely until explicitly removed. This is the entire point of the technique.',
+    authInstant:
+      "auth_time on sign-ins using the new credential reflects that sign-in specifically, with no relationship to whatever compromise originally enabled registration. Once this technique succeeds, the attacker's ongoing access looks like any other passkey user's, at the claim level.",
+    authMethods:
+      "amr on post-registration sign-ins shows the new method (fido2 or equivalent) — and looks exactly as strong and legitimate as any real user's phishing-resistant credential, since Entra ID has no way to distinguish a maliciously-registered key from a real one after the fact. This is a case where a 'strong' amr value should not be read as reassuring.",
+    mfaInstant:
+      "The registration event itself is the moment worth timing precisely — see AuditLogs for the registration timestamp, and cross-reference against the ngcmfa claim's roughly 15-minute validity window if the initiating session's token is available. Once registered, subsequent MFA timing on the attacker's sign-ins is unremarkable.",
+    otherContext:
+      'This entry is a persistence mechanism, not an initial access one — it only becomes relevant after some other compromise already happened. When writing up an incident, present it as a stage in a chain (see distinguishingNotes) rather than a standalone event, since a reader who only sees the registration without the preceding compromise is missing the more important half of the story.',
+  },
+
   runbook: {
     triage: [
       'Identify what was registered and trace the registering session back to its origin.',
@@ -115,10 +155,10 @@ const entry: ThreatEntry = {
       'Determine the timing relative to any other suspicious activity on the account.',
     ],
     contain: [
-      'Remove the attacker-registered method immediately.',
-      'Revoke sessions.',
-      'If the account is confirmed compromised, treat all currently-registered auth methods as suspect and require full re-registration from a verified state.',
-      'Suspend the account if the scope of compromise is unclear.',
+      'Remove the attacker-registered method immediately: `Get-MgUserAuthenticationMethod -UserId <UPN>` to find its ID, then `Remove-MgUserAuthenticationFido2Method -UserId <UPN> -Fido2AuthenticationMethodId <id>`.',
+      'Revoke sessions: `Revoke-MgUserSignInSession -UserId <UPN>`.',
+      'If the account is confirmed compromised, treat all currently-registered auth methods as suspect — list them all with `Get-MgUserAuthenticationMethod -UserId <UPN>`, remove each with its method-specific cmdlet, and require full re-registration from a verified state.',
+      'Suspend the account if the scope of compromise is unclear: `Update-MgUser -UserId <UPN> -AccountEnabled:$false`.',
     ],
     investigate: [
       'Determine how the registering session was obtained — correlate with other scenarios in this matrix (token theft, AiTM, PRT abuse).',

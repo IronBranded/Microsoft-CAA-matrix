@@ -89,6 +89,37 @@ SigninLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "This is the purest case in the whole matrix of a flow defined by absence rather than presence — successful evasion means every step below produces exactly the code a legitimate sign-in would, by design. There's no distinguishing 'evasion code'; the entry's own correlationMarkers note above already makes this point about relevantErrorCodes, and it applies equally here.",
+    steps: [
+      {
+        code: '0',
+        label: 'Sign-in completes successfully, scored low-risk by Identity Protection',
+        detail: "Indistinguishable from a genuine low-risk sign-in — that's the entire objective of the technique. Nothing about this event alone tells you evasion occurred.",
+      },
+      {
+        code: 'risk-not-elevated',
+        label: 'Behavioral signals (device fingerprint, velocity, IP reputation) each individually stay under whatever threshold would trigger a risk detection',
+        detail: 'Not a code at all — an absence. This is why the forensicArtifacts above lean on retrospective comparison (flagged versus unflagged sign-ins for a later-confirmed-compromised account) rather than anything findable in real time from a single event.',
+      },
+    ],
+    distinguishingNotes:
+      "You cannot detect this scenario by looking for it directly — there is nothing positive to alert on. The only way this entry's content becomes actionable is retrospectively, after a compromise is confirmed some other way, when you go back and ask why Identity Protection didn't catch it. If you're trying to build a real-time detection for 'evasion specifically,' that's the wrong goal; the goal is reducing how much evasion is possible in the first place (see recover).",
+  },
+
+  tokenTimeline: {
+    issuance: "Issued at a sign-in that's, by design, indistinguishable from a legitimate one — nothing about issuance timing or context flags this scenario specifically.",
+    expiration: 'Standard token lifetimes. This scenario is about avoiding detection at the point of authentication, not about anything unusual in what happens to the token afterward.',
+    authInstant:
+      'auth_time reflects a genuine-looking sign-in moment with nothing anomalous about it — the entire technique depends on this claim, like everything else about the event, looking ordinary.',
+    authMethods: 'amr reflects whatever the account\'s real methods are, used normally — evasion targets risk scoring, not the authentication mechanism itself, so amr carries no signal here.',
+    mfaInstant: 'Unremarkable, same reasoning as authInstant — if the sign-in successfully evaded risk-based step-up, MFA (if required at all) completed at a normal pace with nothing to flag.',
+    otherContext:
+      "This entry's tokenTimeline is deliberately unremarkable across every field, and that's not a gap — it's the finding. If you're reading this entry hoping to find a claim or timing pattern that reveals evasion, that hope is itself worth recalibrating: the retrospective, comparative approach in forensicArtifacts and the KQL above is the only real path in.",
+  },
+
   runbook: {
     triage: [
       'Pull the full risk detection history for the affected account.',
@@ -96,8 +127,8 @@ SigninLogs
       'Identify the specific evasion technique apparent from the pattern — proxy usage, fingerprint spoofing, paced velocity.',
     ],
     contain: [
-      'Revoke sessions and reset credentials as with any confirmed compromise.',
-      "Manually elevate the account's risk state if Identity Protection itself didn't catch it.",
+      "Revoke sessions and reset credentials as with any confirmed compromise: `Revoke-MgUserSignInSession -UserId <UPN>`, then `Update-MgUser -UserId <UPN> -PasswordProfile @{ Password = '<new password>'; ForceChangePasswordNextSignIn = $true }`.",
+      'Manually elevate the account\'s risk state if Identity Protection itself didn\'t catch it: `Confirm-MgRiskyUserCompromised -UserIds <userObjectId>` (Microsoft.Graph.Identity.SignIns module). This closes the gap between what actually happened and what Identity Protection\'s own risk history shows — the exact gap this scenario is about.',
     ],
     investigate: [
       'Determine how sophisticated the evasion was and whether it suggests a specific, resourced threat actor versus opportunistic reuse of known techniques.',

@@ -111,6 +111,41 @@ SigninLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "As the general case behind AiTM and Primary Refresh Token Abuse elsewhere in this matrix, the exact mechanics of the theft itself vary by vector (malware reading browser storage, a malicious extension, LSASS access) and mostly happen outside Entra ID telemetry entirely. What's consistent across every variant, and what this flow actually documents, is the two-part shape they all share: one legitimate original authentication, followed by reuse from a context that doesn't match it.",
+    steps: [
+      {
+        code: '0',
+        label: 'Original, legitimate authentication',
+        detail: 'The real user completing a real sign-in, including any MFA their account requires. Nothing distinguishes this event from any other successful sign-in at the time it happens — it only becomes relevant in hindsight.',
+      },
+      {
+        code: 'theft',
+        label: 'Cookie/token extraction from the endpoint (mechanism varies)',
+        detail: 'No Entra ID telemetry — this happens locally, on the browser or OS. Endpoint-side signals (DeviceProcessEvents reading cookie storage, LSASS access) are the only visibility, and only where EDR coverage exists.',
+      },
+    ],
+    distinguishingNotes:
+      "This entry deliberately doesn't try to out-specify AiTM or PRT abuse — if you can identify the theft mechanism precisely, use that entry's more detailed flow instead. This one is the fallback for when you have a clear reuse pattern (an anomalousToken risk detection, an IP/device mismatch) but haven't yet pinned down how the credential was actually taken.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued at the original, legitimate authentication — genuinely unremarkable at the time. The replay that follows doesn't mint a new token with a new issuance time in most cases; it reuses what's already valid, which is exactly why session/token theft is attractive relative to re-authenticating as the user.",
+    expiration:
+      "Depends heavily on whether Continuous Access Evaluation applies to the target resource — see the correlationMarkers note above. A stolen CAE-eligible token can remain useful for up to 28 hours rather than the standard 60-90 minute access token lifetime, provided nothing triggers a revocation event in that window.",
+    authInstant:
+      "auth_time pins to the original legitimate authentication, not the theft or replay — the basis for the auth_time-matching technique referenced in the runbook (decode a captured token, match against Interactive SigninLogs to find the original moment). Optional claim; a captured token may not have it.",
+    authMethods:
+      "amr reflects whatever the real user's account required at original sign-in — genuinely accurate, since this is a real completed authentication being reused, not a forged one. That makes amr a poor signal for detecting the theft itself, though it's still useful context for scoping what the attacker's access actually required to obtain.",
+    mfaInstant:
+      "SigninLogs.AuthenticationDetails on the original sign-in — not the replay — is what you want here. The replay typically shows no fresh MFA step, since none is required to reuse an already-valid credential. Trying to time MFA on the reuse event is looking in the wrong place.",
+    otherContext:
+      "Because the underlying credential is genuinely valid at time of theft, token/session evidence alone often can't tell you how it was stolen — only that it's being used somewhere it shouldn't be. Endpoint telemetry is what closes that gap, which is why this entry leans on DeviceProcessEvents more than most identity-focused entries in this domain.",
+  },
+
   runbook: {
     triage: [
       'Identify the theft mechanism — commodity malware, AiTM, or another vector — and confirm the session-reuse pattern.',
@@ -119,8 +154,8 @@ SigninLogs
       "Determine the credential's actual privilege — a stolen token for a privileged account is a different severity than for a standard user.",
     ],
     contain: [
-      'Revoke sessions and tokens (`Revoke-MgUserSignInSession`).',
-      "Reset the user's password as a precaution.",
+      'Revoke sessions and tokens: `Revoke-MgUserSignInSession -UserId <UPN>`.',
+      "Reset the user's password as well, alongside revocation rather than instead of it: `Update-MgUser -UserId <UPN> -PasswordProfile @{ Password = '<new password>'; ForceChangePasswordNextSignIn = $true }`.",
       'Run malware scan/remediation on the source endpoint.',
       "Block the attacker's identified infrastructure at the network layer.",
     ],

@@ -90,6 +90,45 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "The distinctive part of this flow isn't a set of AADSTS codes — it's that a hooked PTA agent breaks the normal semantics of what a success code means. Every PTA-mediated sign-in normally requires genuine on-prem AD validation; once a validator is hooked, cloud-side SigninLogs shows exactly the same success code for a genuine validation and a forced one, with the difference only visible by correlating against ground truth on the AD side.",
+    steps: [
+      {
+        code: 'agent-compromise',
+        label: 'Attacker gains local admin on a PTA agent host, or registers a rogue agent using a compromised Global Admin session',
+        detail: "No cloud-side telemetry for the local-admin path — that's an on-prem endpoint compromise. The rogue-agent-registration path does show in AuditLogs, and is the more detectable of the two routes into this technique.",
+      },
+      {
+        code: 'dll-hook-installed',
+        label: "AzureADConnectAuthenticationAgentService.exe's credential-validation handling is hooked",
+        detail: 'Local to the compromised host — DeviceImageLoadEvents (see the Defender query above) is the only visibility, and only where EDR coverage exists on that specific server.',
+      },
+      {
+        code: '0',
+        label: 'Subsequent PTA sign-ins validate successfully regardless of the actual on-prem password',
+        detail: 'Structurally identical to a genuine PTA success — same AADSTS 0, same claims shape. The only way to tell these apart from legitimate successes is correlating against known on-prem password/account state, which is exactly what the forensicArtifacts and correlationMarkers above are built around.',
+      },
+    ],
+    distinguishingNotes:
+      "The rogue-agent-registration path and the local-DLL-hook path converge on the same outcome (fraudulent validation) but leave very different evidence — one lives in AuditLogs and is comparatively easy to spot, the other lives entirely on a specific on-prem host and requires EDR coverage there specifically to see at all. Establish which path applies early, since it determines whether you're pulling cloud logs or doing host forensics next.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      'Issued at the moment of the (potentially fraudulent) PTA validation success — structurally identical whether the validation was genuine or forced by a hook. Nothing at the token level distinguishes the two; the distinguishing evidence lives entirely outside the token, in agent registration state and on-prem password ground truth.',
+    expiration:
+      "Standard token lifetimes for whatever's issued at successful PTA validation. This technique doesn't itself extend token life or open a PRT/device-registration path the way some other Domain 1 entries do — its value to an attacker is repeatable fraudulent authentication, not a single high-value token.",
+    authInstant: "auth_time pins to the (possibly fraudulent) PTA validation moment, indistinguishable from a genuine one at the claim level. Optional claim, as elsewhere.",
+    authMethods:
+      "amr for a PTA sign-in reflects password as the primary factor, same as it would for a genuine one — a hooked validator doesn't change what the token claims about how authentication happened, only whether the underlying validation was actually performed correctly.",
+    mfaInstant:
+      "Orthogonal to this technique specifically — PTA governs password/first-factor validation; whatever MFA policy applies afterward is unaffected by whether the PTA validation itself was hooked. If the account also requires MFA, that challenge still has to be cleared separately and would time normally.",
+    otherContext:
+      "This is a case where token/session evidence is close to useless on its own — the compromise lives in the trust relationship between the cloud service and the on-prem validator, not in anything the resulting token carries. Ground-truth correlation against on-prem AD state (was this password actually valid at this moment?) is doing more investigative work here than anywhere else in Domain 1.",
+  },
+
   runbook: {
     triage: [
       'Check the Entra Connect admin center (or the PTA agent management APIs) for the full list of registered agents and confirm every one is a known, expected on-prem server.',
@@ -98,10 +137,11 @@ const entry: ThreatEntry = {
       'Check whether the Entra Connect / PTA agent server itself shows separate signs of compromise — this technique requires local admin access to install a DLL hook.',
     ],
     contain: [
-      'Deregister and delete any rogue or unrecognized PTA agent immediately.',
+      'Deregister and delete any rogue or unrecognized PTA agent from the Entra admin center — there is no clean Graph PowerShell cmdlet to remove a single specific agent from the cloud side; this is a portal action, or uninstalling the agent software directly on the host it runs on.',
+      "If you need an immediate, blunt stop rather than surgical removal of one agent, `Disable-PassthroughAuthentication` (run locally on a legitimate agent host, via the PassthroughAuthPSModule bundled with the agent install) turns off PTA tenant-wide. This is a real, documented cmdlet, but it's an emergency lever, not a scalpel — confirm Password Hash Sync is already enabled as a fallback before using it, or you risk locking out sign-in entirely rather than just cutting off the rogue agent.",
       'If a local DLL hook is confirmed on a legitimate agent host, take that host offline and treat it as fully compromised — reinstall the PTA agent from a clean source only after the host itself is remediated.',
       "Rotate the AD DS Connector account's on-prem AD password, since a compromised Connect server may have extracted it.",
-      "Require re-registration of the affected device(s) rather than trusting continued device state.",
+      'Require re-registration of the affected device(s) rather than trusting continued device state.',
     ],
     investigate: [
       'Determine how far back the rogue agent or DLL hook has been in place — every authentication that could have transited it should be treated as potentially observed or manipulated.',

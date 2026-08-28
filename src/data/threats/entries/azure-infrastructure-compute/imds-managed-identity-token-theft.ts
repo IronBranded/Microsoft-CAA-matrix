@@ -125,6 +125,39 @@ AzureActivity
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "The token-minting step itself happens entirely between the VM and IMDS — a link-local call that never touches Entra ID's sign-in surface at all, which is what makes this different from every Domain 1 phishing/credential scenario. The only Entra-ID-visible event is the managed identity's own sign-in once IMDS has already handed the attacker a valid token.",
+    steps: [
+      {
+        code: 'imds-request',
+        label: 'Attacker code on the VM requests a token from 169.254.169.254 with the Metadata: true header',
+        detail: 'No Azure platform-level log captures this regardless of outcome — only guest-OS-level EDR (DeviceNetworkEvents/DeviceProcessEvents) sees it, and only where Defender for Endpoint is deployed on that specific VM.',
+      },
+      {
+        code: '0',
+        label: "IMDS mints the token, and the managed identity's sign-in appears in AADManagedIdentitySignInLogs",
+        detail: 'The first event this entire chain produces in Entra ID telemetry — everything before this step is invisible from the identity side.',
+      },
+    ],
+    distinguishingNotes:
+      "Don't expect this to look like a Domain 1 credential-theft flow with a rich AADSTS code sequence — the interesting part of this technique happens entirely outside Entra ID, on the compromised VM itself, before any identity-side telemetry exists at all. If your only visibility is Entra ID logs and you don't have EDR on the VM's guest OS, you'll see the sign-in but never the actual IMDS query that produced it.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      'Issued directly by IMDS on request, with no interactive or delegated flow of any kind — a managed identity token is minted the moment the local metadata call succeeds, using the header check as the only gate (and a weak one — see relevantErrorCodes).',
+    expiration:
+      'Managed identity tokens follow standard access token lifetimes. Because reissuing one requires only another IMDS call from the same compromised VM, expiration provides little real containment on its own if the underlying code-execution access on the VM remains open — the attacker simply requests a fresh token.',
+    authInstant:
+      "Not really applicable in the JWT auth_time sense this matrix uses elsewhere — managed identity tokens are non-interactive by construction, so there's no interactive authentication moment to pin. The AADManagedIdentitySignInLogs event timestamp is the closest equivalent anchor.",
+    authMethods: "amr is not a meaningful field for managed identity tokens the way it is for user tokens — there's no user authentication method involved at all. Don't go looking for it here.",
+    mfaInstant: "Not applicable — managed identities cannot complete MFA, and nothing in this flow involves it. If you're used to Domain 1 entries where this field always has something to say, this is the exception.",
+    otherContext:
+      "The real containment lever for this scenario isn't token-level at all — it's identity-level (disable the managed identity, or strip its role assignments) and VM-level (remediate the code-execution access). A stolen managed identity token, once issued, behaves exactly like a legitimate one for its full lifetime; there's no revocation-by-session mechanism analogous to Revoke-MgUserSignInSession for this identity type.",
+  },
+
   runbook: {
     triage: [
       'Identify which VM/compute resource owns the managed identity (system-assigned ties 1:1 to a resource; user-assigned may be shared — check assignment scope).',
@@ -133,8 +166,8 @@ AzureActivity
       'Determine the initial access vector that gave the attacker code execution on the VM — this scenario is almost always a second stage, not the initial compromise.',
     ],
     contain: [
-      "Remove or scope down the managed identity's role assignments immediately (`az role assignment delete` or via Portal) to cut off what a stolen token can do, even before the VM compromise is fully remediated.",
-      'If the identity is system-assigned, consider disabling it on the VM — this immediately invalidates all outstanding tokens for that identity.',
+      'Remove or scope down the managed identity\'s role assignments immediately: `Remove-AzRoleAssignment -ObjectId <managed identity object id> -RoleDefinitionName "<role>" -Scope "<scope>"` (Az.Resources module) — this cuts off what a stolen token can do even before the VM compromise is fully remediated.',
+      "If the identity is system-assigned, disable it on the VM to immediately invalidate all outstanding tokens. Az.Compute has a cmdlet for removing a VM's system-assigned identity — verify the exact current name against your installed Az module version before scripting this specific step, since that corner of Az.Compute has shifted across versions more than Az.Resources has. The portal path (VM > Identity > System assigned > Off) is a reliable fallback either way.",
       "Isolate the VM at the network layer (NSG deny-all, or Defender for Endpoint's device isolation) to stop further IMDS abuse while investigating.",
       'Rotate any secrets or downstream credentials the identity had access to (e.g. Key Vault secrets), since a minted token may already have retrieved them.',
     ],

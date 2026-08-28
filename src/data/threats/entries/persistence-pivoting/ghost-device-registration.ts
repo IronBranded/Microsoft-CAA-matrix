@@ -103,6 +103,50 @@ SigninLogs
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "Same structural pattern as fido2-passkey-registration-hijacking and suspicious-credential-addition-oauth-app elsewhere in this matrix — a registration event that only becomes a real persistence mechanism after some other compromise already granted the registering session in the first place.",
+    steps: [
+      {
+        code: 'session-established',
+        label: 'Attacker obtains any authenticated session on the target account',
+        detail: "Not this entry's mechanism — see whichever compromise scenario elsewhere in this matrix actually applies. Device registration is typically self-service, so this step is what makes it possible at all.",
+      },
+      {
+        code: 'device-registered',
+        label: 'A new, unmanaged device object is registered against the account',
+        detail: "AuditLogs 'Add device' event. The device exists as an object from this moment, but isn't yet proven to satisfy anything — that depends on how the relevant Conditional Access policy actually evaluates trust.",
+      },
+      {
+        code: '53000',
+        label: '(Where compliance is genuinely required and correctly checked) the device fails the compliance check',
+        detail: 'What should happen for a never-enrolled device — its absence for subsequent sign-ins from this device is the actual finding, meaning the policy is checking join-type alone rather than real compliance.',
+      },
+      {
+        code: '0',
+        label: 'Subsequent sign-in succeeds with the ghost device satisfying device-based Conditional Access',
+        detail: 'The point the registration converts from a standing object into active bypass. Confirms the policy gap is actually being exploited, not just theoretically present.',
+      },
+    ],
+    distinguishingNotes:
+      "The device registration event and its later use can be separated by any amount of time — don't assume they're close together the way a phishing-to-token flow would be. Trace both ends: backward to how the registering session was obtained, and forward to confirm the device is actually being used to satisfy policy, not just sitting registered and unused.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Tokens issued from sign-ins using the ghost device are otherwise ordinary — the device's DeviceId simply appears in DeviceDetail, and Conditional Access evaluates it like any other registered device would be evaluated.",
+    expiration:
+      "The device object itself doesn't expire the way a token does — it persists as a standing object until explicitly removed, which is exactly what makes this durable persistence rather than a one-time bypass.",
+    authInstant:
+      "auth_time reflects whatever authentication actually happened at sign-in — unremarkable on its own. The device-trust bypass is a separate, additive factor evaluated alongside the user's authentication, not something that changes this claim.",
+    authMethods: "amr reflects the user's actual authentication methods, same as any sign-in — this scenario is about device trust specifically, not about weakening the user-authentication side at all.",
+    mfaInstant:
+      'Unaffected by this scenario — if the account also requires MFA independent of device compliance, that still has to be cleared separately. Ghost device registration defeats device-based checks specifically, not MFA.',
+    otherContext:
+      "The interesting object to track over time isn't a token — it's the device object's DeviceId, and everywhere it subsequently appears in SigninLogs.DeviceDetail. A single device can be reused across many sessions over an extended period, so pulling the full history for that DeviceId, not just the registration event, is necessary to scope the actual impact.",
+  },
+
   runbook: {
     triage: [
       'Identify the registering session and trace it back to how that access was obtained.',
@@ -111,10 +155,10 @@ SigninLogs
       'Determine the account this device is registered to and its privilege level.',
     ],
     contain: [
-      'Remove or disable the rogue device object.',
-      'Revoke sessions tied to it.',
+      'Remove or disable the rogue device object: `Remove-MgDevice -DeviceId <deviceObjectId>` (verify the parameter name against your installed Microsoft.Graph module version, as noted elsewhere in this matrix).',
+      'Revoke sessions tied to the account: `Revoke-MgUserSignInSession -UserId <UPN>`.',
       "Tighten the Conditional Access policy if it's evaluating join-type alone rather than genuine compliance.",
-      'Suspend the registering account if it appears compromised.',
+      'Suspend the registering account if it appears compromised: `Update-MgUser -UserId <UPN> -AccountEnabled:$false`.',
     ],
     investigate: [
       'Determine what the device was used to access after registration.',

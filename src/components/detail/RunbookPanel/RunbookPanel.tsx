@@ -111,7 +111,7 @@ export default function RunbookPanel({ runbook, threatId }: RunbookPanelProps) {
               />
               <span className={styles.stepIndex}>{String(i + 1).padStart(2, '0')}</span>
               <span className={styles.stepText} data-checked={checked.has(i)}>
-                {stripLeadingNumber(step)}
+                {renderStepText(step)}
               </span>
             </label>
           </li>
@@ -125,4 +125,22 @@ export default function RunbookPanel({ runbook, threatId }: RunbookPanelProps) {
  *  strip it since the list already numbers itself, to avoid a double index. */
 function stripLeadingNumber(text: string): string {
   return text.replace(/^\d+\.\s*/, '')
+}
+
+/** Steps often contain `backtick-wrapped` PowerShell cmdlets or KQL
+ *  fragments — render those segments as styled inline code instead of
+ *  showing literal backtick characters. Plain-text segments pass through
+ *  unchanged, so steps with no backticks render exactly as before. */
+function renderStepText(text: string) {
+  const clean = stripLeadingNumber(text)
+  const parts = clean.split(/(`[^`]+`)/g)
+  return parts.map((part, i) =>
+    part.startsWith('`') && part.endsWith('`') && part.length > 1 ? (
+      <code key={i} className={styles.stepCode}>
+        {part.slice(1, -1)}
+      </code>
+    ) : (
+      part
+    ),
+  )
 }

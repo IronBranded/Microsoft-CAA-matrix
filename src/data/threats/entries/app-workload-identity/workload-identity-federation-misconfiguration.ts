@@ -82,6 +82,38 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "As this entry's own correlationMarkers already note, there's no distinguishing error code here — a misconfigured federated credential means an out-of-scope workflow successfully exchanges its token, exactly as the flow is designed to work. The only way to see the problem is comparing what the trust was supposed to allow against what actually triggered it, on the external platform's own side.",
+    steps: [
+      {
+        code: 'external-token-issued',
+        label: 'External OIDC provider (GitHub Actions, GitLab CI, etc.) issues its own token for the workflow run',
+        detail: "Outside Entra ID entirely — this exists only in the external platform's own logs, which is why cross-referencing them against Entra ID's side is the core investigative move for this scenario.",
+      },
+      {
+        code: '0',
+        label: 'Entra ID exchanges the external token for its own token, because the presented subject/issuer/audience matches the configured (and too-broad) trust pattern',
+        detail: "A fully successful, correctly-functioning token exchange from Entra ID's perspective — the platform has no way to know the subject match was broader than intended.",
+      },
+    ],
+    distinguishingNotes:
+      "This is genuinely the cleanest 'absence is the signal' case in the whole matrix, because there isn't even a leaked secret to hunt for — the vulnerability is entirely in a configuration field's specificity. If you're looking for a moment something went wrong, there isn't one; the exchange worked exactly as configured, and the configuration is the finding.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued immediately on successful token exchange — no delay, no secret to present, no interactive step. The entire security boundary is upstream of issuance, in whether the presented external token's subject/issuer/audience matched the configured pattern.",
+    expiration:
+      "Standard app-only access token lifetimes for whatever's exchanged. As with service-principal-workload-identity-abuse, the durable asset isn't any single token — it's the ongoing ability to trigger the trust relationship again, which persists until the federated credential's subject pattern is actually tightened.",
+    authInstant: 'Not meaningful in the interactive sense — this is a machine-to-machine exchange with no user or device-bound authentication moment at all.',
+    authMethods: 'amr is not populated for this token type — there\'s no authentication method claim to speak of in a federated app-only exchange.',
+    mfaInstant: 'Not applicable — nothing about this flow involves or could involve MFA.',
+    otherContext:
+      "Unlike service-principal-workload-identity-abuse, there's no credential to rotate here at all — that's the whole appeal of federation, and also what makes remediation different. Fixing this means editing the trust configuration itself (the subject pattern), not revoking a secret or certificate.",
+  },
+
   runbook: {
     triage: [
       'Pull the exact configured subject/issuer/audience pattern for the federated credential.',
@@ -90,9 +122,9 @@ const entry: ThreatEntry = {
       'Determine what the token was actually used for once obtained.',
     ],
     contain: [
-      "Narrow the federated credential's subject pattern immediately to the minimum necessary scope.",
-      'Remove the federated credential entirely if the application no longer needs it.',
-      'Revoke any tokens/sessions obtained via the overly-broad trust.',
+      "Narrow the federated credential's subject pattern immediately to the minimum necessary scope: `Update-MgApplicationFederatedIdentityCredential -ApplicationId <id> -FederatedIdentityCredentialId <id> -BodyParameter @{ subject = '<narrowed subject pattern>' }`.",
+      'Remove the federated credential entirely if the application no longer needs it: `Remove-MgApplicationFederatedIdentityCredential -ApplicationId <id> -FederatedIdentityCredentialId <id>`.',
+      "There's no session to revoke the way there is for user or service-principal-secret compromises — app-only tokens from this exchange simply expire on their own standard lifetime once the trust pattern is fixed, since no new tokens can be minted against the corrected scope. Treat closing the configuration gap as the actual containment action, not a follow-up to one.",
       'Review the external platform account/workflow that triggered the issue for its own compromise.',
     ],
     investigate: [

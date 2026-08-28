@@ -103,6 +103,39 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "This entry is deliberately thin on auth-flow content, because reconnaissance isn't really an authentication pattern — it's a way of using whatever access already exists, obtained through any mechanism documented elsewhere in this matrix (a compromised credential, an overprivileged guest account, a genuine admin session). The one code-level event that matters is the token issuance itself; everything distinctive about this scenario happens after that, in Graph API call volume and pattern, not in the auth flow.",
+    steps: [
+      {
+        code: '0',
+        label: 'Token issued via whatever mechanism actually applies (out of scope for this entry)',
+        detail: "Could be a legitimate admin sign-in, a compromised low-privilege account, a guest invite, or a stolen token from any other entry in this matrix. Nothing about the sign-in event itself distinguishes reconnaissance intent — that only shows up afterward, in what the token gets used for.",
+      },
+      {
+        code: 'graph-enumeration-burst',
+        label: 'High-volume, broad-scope Graph API read calls using that token',
+        detail: 'Not an authentication event at all — a usage pattern. This is genuinely the entire signal for this scenario, which is why the KQL above keys entirely on request volume and endpoint diversity rather than any sign-in-side property.',
+      },
+    ],
+    distinguishingNotes:
+      "Don't treat this entry's authFlow as a template the way you would device-code-phishing's — there's no phishing moment, no registration event, no code sequence unique to reconnaissance. If you're investigating a suspected recon burst, your actual job is identifying what got the attacker their token in the first place (a different entry's flow) and then scoping what they read with it (this entry's forensicArtifacts and KQL).",
+  },
+
+  tokenTimeline: {
+    issuance:
+      'Whenever the underlying access was obtained — out of scope for this entry specifically, since reconnaissance uses whatever token already exists rather than following a distinctive issuance pattern of its own.',
+    expiration:
+      "Standard lifetimes for whatever token type is in use. Reconnaissance itself doesn't extend or otherwise affect token validity — it's simply usage within the token's normal lifetime, potentially refreshed repeatedly if the enumeration burst runs long enough to need it.",
+    authInstant:
+      'auth_time reflects whatever the underlying authentication was — not informative for reconnaissance specifically, since this claim describes how the access was obtained, not what it was subsequently used for.',
+    authMethods: "amr reflects the underlying authentication's methods, same caveat as authInstant — this field tells you about the entry point, not about the enumeration activity itself.",
+    mfaInstant: "Not a useful lens for this scenario. If you're trying to time MFA completion, you're really investigating the access-acquisition entry that applies here, not reconnaissance specifically.",
+    otherContext:
+      'The absence of a corresponding AuditLogs trail (noted in forensicArtifacts) is itself a structural fact worth internalizing: pure read activity generally doesn\'t get audited the way write operations do, so sign-in and Graph request volume is genuinely the primary — sometimes only — visibility this matrix has into reconnaissance, regardless of which token or account performed it.',
+  },
+
   runbook: {
     triage: [
       "Identify the account/app/token performing enumeration and its normal baseline behavior.",
@@ -111,7 +144,7 @@ const entry: ThreatEntry = {
       'Establish whether enumeration is still ongoing or was a discrete, completed burst.',
     ],
     contain: [
-      'Revoke the session/token performing enumeration if tied to a compromised account.',
+      'Revoke the session/token performing enumeration if tied to a compromised account: `Revoke-MgUserSignInSession -UserId <UPN>`.',
       'Block the source IP if external and clearly malicious.',
       'Increase monitoring sensitivity tenant-wide for a period following confirmed reconnaissance.',
     ],

@@ -97,6 +97,40 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "As this entry's own correlationMarkers already note, there's no distinguishing error code — using an already-existing, already-invited guest account produces a completely normal successful sign-in. The signal is entirely in the account's activity pattern over time (dormancy, then sudden activity; access broader than the original collaboration purpose), not in any single event.",
+    steps: [
+      {
+        code: 'guest-invited',
+        label: 'Guest account created via B2B invitation',
+        detail: 'AuditLogs event, tied to a specific inviting user and (ideally) a documented business purpose. This is the moment the standing access is created — everything after this is just whether and how it gets used.',
+      },
+      {
+        code: '0',
+        label: 'Guest account authenticates, potentially after an extended dormant period',
+        detail: 'A fully ordinary success. The account genuinely is an authorized guest — the concern is about scope and staleness, not about the authentication event\'s legitimacy.',
+      },
+    ],
+    distinguishingNotes:
+      'This shares a family resemblance with cross-tenant-trust-exploitation — both involve a standing trust relationship with an external identity rather than a discrete attack moment — but at individual-account granularity rather than tenant-wide policy. A single stale guest account is a much narrower blast radius than an overly broad inbound cross-tenant policy, but the investigative logic (check the relationship\'s scope against its actual current use, not just whether the sign-in succeeded) is the same.',
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued through the normal guest sign-in flow — HomeTenantId reflects the guest's actual home organization (or personal Microsoft account), distinct from your own ResourceTenantId. Nothing about issuance itself is unusual regardless of how long the account has been dormant.",
+    expiration:
+      'Standard token lifetimes. The durable risk isn\'t any single token — it\'s the standing guest account object and its access grants, which persist across any number of individual sign-in/token cycles until explicitly reviewed and removed.',
+    authInstant:
+      "auth_time reflects the guest's actual authentication, in whatever identity system their home tenant uses — genuinely valid, not forged. This scenario is about scope and lifecycle, not about the authentication event's own legitimacy.",
+    authMethods: "amr reflects whatever the guest's home identity provider required — which may be entirely outside your own tenant's control or visibility, similar to the provenance concern in cross-tenant-trust-exploitation.",
+    mfaInstant:
+      "Governed by whatever cross-tenant access settings apply to guest sign-ins specifically — if your tenant trusts the guest's home MFA claim rather than re-evaluating it, there's no local MFA instant for this sign-in at all.",
+    otherContext:
+      "The object worth tracking over time isn't a token or even a single sign-in — it's the guest account's full access history against its original documented purpose. A guest account that's accumulated access via ad hoc group additions over months, well beyond whatever the original invitation was for, is the practical shape this risk actually takes.",
+  },
+
   runbook: {
     triage: [
       "Confirm the guest account's original invitation purpose and inviting user.",
@@ -104,9 +138,9 @@ const entry: ThreatEntry = {
       'Check for a long dormancy period preceding recent activity.',
     ],
     contain: [
-      'Disable or remove the guest account if no longer needed.',
-      'Revoke sessions.',
-      'Tighten its access scope if broader than the original collaboration purpose.',
+      'Disable or remove the guest account if no longer needed: `Update-MgUser -UserId <guest object id> -AccountEnabled:$false` to disable, or `Remove-MgUser -UserId <guest object id>` to remove it entirely.',
+      'Revoke sessions: `Revoke-MgUserSignInSession -UserId <guest object id>`.',
+      'Tighten its access scope if broader than the original collaboration purpose — review and remove group/role memberships that exceed the documented collaboration need.',
     ],
     investigate: [
       'Determine what the guest account accessed, particularly anything beyond the original collaboration scope.',

@@ -103,6 +103,45 @@ entra_saml_signins
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "As this entry's own correlationMarkers already state, there's no distinguishing AADSTS code — a validly-signed forged assertion is accepted exactly like a real one. The signal isn't in Entra ID's own telemetry at all; it's in the absence of a corresponding event on the AD FS server side, which a forged assertion never touches.",
+    steps: [
+      {
+        code: 'private-key-compromised',
+        label: "Attacker obtains the AD FS token-signing certificate's private key",
+        detail: "No Entra ID telemetry — this is an on-prem AD FS server compromise, visible (if at all) only in that server's own Security/Admin event log.",
+      },
+      {
+        code: 'assertion-forged',
+        label: 'SAML assertion crafted offline, asserting any UPN and claims the attacker chooses',
+        detail: 'Happens entirely on attacker infrastructure — never touches the real AD FS server, which is exactly why ADFSSignInLogs shows nothing for this step.',
+      },
+      {
+        code: '0',
+        label: 'Entra ID accepts the forged assertion as a successful federated sign-in',
+        detail: "Indistinguishable from a real federated sign-in at the AADSTS level — the trust model is 'anything validly signed by this certificate is legitimate,' and a stolen key satisfies that completely.",
+      },
+    ],
+    distinguishingNotes:
+      'This is the highest-severity version of the absence-is-the-signal pattern in the whole matrix, because unlike identity-protection-evasion or a policy gap, there is no legitimate baseline this can degrade from — a Golden SAML sign-in is a complete fabrication with a real cryptographic signature. The only handle DFIR has on it is the missing AD FS server-side correlation event; there is no code, claim, or behavioral baseline that reveals it on the Entra ID side alone.',
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued the moment Entra ID accepts the forged assertion — but unlike every other entry in this matrix, this isn't really 'issuance' in the normal sense, since nothing about the underlying authentication actually happened. The token is a consequence of trust in a signature, not of any real credential check.",
+    expiration:
+      'Standard token lifetimes apply to what Entra ID issues in response, but the deeper problem is that the attacker can simply forge another assertion at will for as long as the signing key remains compromised — expiration of any single token provides essentially no containment.',
+    authInstant:
+      "auth_time is whatever value the attacker chose to put in the forged assertion — entirely attacker-controlled, not a record of anything that actually happened. Treat this claim as worthless for this specific scenario, unlike its genuine diagnostic value everywhere else in this matrix.",
+    authMethods:
+      "amr, similarly, reflects whatever claims the attacker chose to forge — it can claim MFA was completed when nothing was completed at all. This is the one entry in the entire matrix where amr should be treated as actively adversarial rather than merely unhelpful.",
+    mfaInstant: 'There is no real MFA instant, because there was no real authentication. Any MFA-related claim in the token is fabricated.',
+    otherContext:
+      "This entry is the clearest illustration of why this matrix insists elsewhere that SigninLogs.AuthenticationDetails, not token claims, is the reliable source for MFA timing — here, even the log-side claims can't be trusted, because the entire sign-in is forged from outside Entra ID's own authentication pipeline. The only trustworthy anchor is the AD FS server's own independent log, specifically because a forgery cannot produce a matching entry there.",
+  },
+
   runbook: {
     triage: [
       'Confirm ADFSSignInLogs ingestion is actually enabled before trusting an "all clear" from the correlation query — a silent logging gap looks identical to a clean environment.',

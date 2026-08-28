@@ -91,6 +91,37 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'sequence',
+    narrative:
+      "Like identity-protection-evasion elsewhere in this matrix, the notable event here is an absence rather than a presence — a sign-in that completes without a challenge a policy was supposed to apply. Unlike that entry, the gap itself is usually a static configuration state that predates any specific attacker action, not something actively defeated in the moment.",
+    steps: [
+      {
+        code: '0',
+        label: 'Sign-in completes without the challenge an intended policy should have applied',
+        detail: 'No AADSTS53003 (blocked) and no step-up challenge — just a plain success, for a user/app combination that a properly-scoped policy would have caught. The absence of the expected friction is the entire signal.',
+      },
+      {
+        code: '53003',
+        label: '(For comparison) what a working policy produces on the same combination',
+        detail: "This is the code you'd expect to see if the policy actually applied. Its absence on the sign-in in question is what confirms a gap rather than a policy simply not existing at all — check both.",
+      },
+    ],
+    distinguishingNotes:
+      "This entry and identity-protection-evasion share the same shape (a normal-looking success where friction was expected) but different causes: evasion is an attacker actively shaping behavior to stay under a detection threshold; a policy gap is a standing misconfiguration that would let the same sign-in through regardless of how it was conducted. If tightening detection thresholds doesn't fix the problem, you're likely looking at a gap, not evasion.",
+  },
+
+  tokenTimeline: {
+    issuance: "Issued exactly as it would be for any successful sign-in — a policy gap doesn't change how or when the token is issued, only whether a challenge happened first.",
+    expiration: 'Standard lifetimes, unaffected by this scenario specifically.',
+    authInstant: 'auth_time reflects an ordinary sign-in moment with nothing distinguishing it from a fully-covered, policy-compliant sign-in at the claim level.',
+    authMethods:
+      'amr shows whatever the user actually provided — which may be password alone, less than what a properly-scoped policy would have required. A single-factor amr on an account that should be MFA-covered is itself the practical symptom worth checking, cross-referenced against current policy scope rather than assumed to mean compromise on its own.',
+    mfaInstant: "Absent, for the accounts actually affected by the gap — there's no MFA instant to find because no MFA was required, which is precisely the finding.",
+    otherContext:
+      'Because this is a standing configuration state rather than a discrete event, the useful posture here is periodic review (the What If tool, a recurring exclusion-list audit) rather than trying to catch a specific moment in the logs. By the time a sign-in through the gap shows up in SigninLogs, the gap has usually existed for a while already.',
+  },
+
   runbook: {
     triage: [
       'Review current CA policy exclusions and confirm each against a change/approval record.',
@@ -99,9 +130,9 @@ const entry: ThreatEntry = {
       'If a compromise is already underway, identify the specific gap being exploited.',
     ],
     contain: [
-      'Close the identified gap — remove the exclusion, or switch report-only to enabled.',
+      "Close the identified gap — remove the exclusion or switch report-only to enabled. `Update-MgIdentityConditionalAccessPolicy -ConditionalAccessPolicyId <id> -BodyParameter @{ state = 'enabled' }` covers the report-only case directly; the nested condition/exclusion structure for other changes is complex enough that the portal is often more practical and less error-prone for that specific edit.",
       'Force re-authentication for accounts that signed in via the gap.',
-      'Revoke sessions for any account whose access relied on the gap.',
+      'Revoke sessions for any account whose access relied on the gap: `Revoke-MgUserSignInSession -UserId <UPN>`.',
       'Temporarily tighten related policies while the root cause is addressed.',
     ],
     investigate: [

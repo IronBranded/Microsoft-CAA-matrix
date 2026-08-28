@@ -103,6 +103,44 @@ const entry: ThreatEntry = {
     },
   },
 
+  authFlow: {
+    pattern: 'cluster',
+    narrative:
+      "Like MFA fatigue elsewhere in this domain, what this produces in SigninLogs is a cluster of near-identical failure codes rather than a causal chain — spray shows the cluster spread across many accounts from one source, brute force shows it concentrated against one account. Either shape, the individual failed attempts aren't meaningfully ordered relative to each other; only their volume and the eventual success that breaks the pattern matter.",
+    steps: [
+      {
+        code: '50126',
+        label: 'Invalid username or password',
+        detail: 'The routine per-attempt failure. On its own, completely unremarkable — every mistyped password produces this. Volume and distinct-account/distinct-IP shape (see the two triage queries) is what turns a handful of these into a detectable attack.',
+      },
+      {
+        code: '50053',
+        label: 'Account locked (Smart Lockout engages)',
+        detail: "Not guaranteed to appear — depends on attack tempo and infrastructure discipline (see forensicArtifacts). Its presence confirms Smart Lockout is actively engaging against this account; its absence doesn't mean no attack, only that the attacker avoided tripping the familiar-location heuristic.",
+      },
+      {
+        code: '0',
+        label: 'Eventual success',
+        detail: "The one attempt, out of potentially hundreds, that had the right password. Nothing about this event's own code distinguishes it from a legitimate sign-in — only its position at the tail of an anomalous failure cluster does.",
+      },
+    ],
+    distinguishingNotes:
+      "This is structurally the same shape as mfa-fatigue-push-bombing one layer down — a dense cluster of routine failure codes ending in one success — just at the password/first-factor stage instead of the MFA/second-factor stage. If an account shows both patterns back to back (a spray success immediately followed by an MFA fatigue cluster), that's a full first-factor-then-second-factor compromise chain, not two unrelated incidents.",
+  },
+
+  tokenTimeline: {
+    issuance:
+      "Issued at the successful attempt — the one that guessed correctly. If the account has MFA enforced, the attacker still needs to clear that separately (see mfa-fatigue-push-bombing and the token-theft entries for what happens next); a bare password compromise without MFA on the account goes straight to token issuance with nothing further to detect at the auth-flow level.",
+    expiration: 'Standard access/refresh token lifetimes — nothing about a spray/brute-force-obtained token is structurally different from a legitimate one once issued.',
+    authInstant: 'auth_time pins to the successful attempt and looks exactly like any other sign-in\'s auth_time. Optional claim; don\'t assume presence in a captured token.',
+    authMethods:
+      "amr reflects whatever the account's actual configured methods are — password alone if MFA isn't enforced, or password plus whatever MFA the attacker also cleared if it is. amr doesn't carry any signal that the password was guessed rather than known; that distinction lives entirely in the failure cluster preceding it, not in the successful token's claims.",
+    mfaInstant:
+      "Only relevant if the account has MFA enforced and the attacker got past it too — see mfa-fatigue-push-bombing and token-theft-session-hijacking for what that stage looks like. For a bare password compromise on an MFA-exempt account, there's no MFA instant to find at all, which is itself worth flagging as a policy gap.",
+    otherContext:
+      "The compromise itself is rarely the objective — what the account does in the minutes immediately after successful sign-in (new MFA registration, app consent, mailbox rule creation) is usually more informative than anything about the sign-in event itself. Treat the auth flow as the entry point to investigate from, not the finding.",
+  },
+
   runbook: {
     triage: [
       'Identify the attack shape — spray versus brute force — and the full list of targeted accounts.',
@@ -112,9 +150,9 @@ const entry: ThreatEntry = {
     ],
     contain: [
       'Block the source IP at the network/CA layer.',
-      'Force a password reset for any account with a successful sign-in in the attack window.',
-      'Confirm smart lockout is active and functioning as expected.',
-      'Require MFA re-registration for compromised accounts from a verified, known-good session.',
+      "Force a password reset for any account with a successful sign-in in the attack window: `Update-MgUser -UserId <UPN> -PasswordProfile @{ Password = '<new password>'; ForceChangePasswordNextSignIn = $true }`. Pair it with `Revoke-MgUserSignInSession -UserId <UPN>` so a session established before the reset doesn't survive it.",
+      'Confirm Smart Lockout is active and functioning as expected.',
+      'Require MFA re-registration for compromised accounts from a verified, known-good session — remove the existing method(s) first rather than trust them: `Get-MgUserAuthenticationMethod -UserId <UPN>` to find the ID, then the method-specific removal cmdlet.',
     ],
     investigate: [
       'Determine what the compromised account(s) did post-compromise.',
